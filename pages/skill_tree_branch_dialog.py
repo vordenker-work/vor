@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
     QPushButton, QColorDialog, QMessageBox, QComboBox, QWidget
@@ -6,10 +8,10 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor
 from database import skill_tree_db
 
-class BranchDialog(QDialog):
+class BranchDialog(BaseTranslatableDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Manage Skill Branches")
+        self.setWindowTitle(Translator.translate("title.manage_skill_branches"))
         self.resize(450, 450)
         self.setStyleSheet("""
             QDialog {
@@ -74,7 +76,7 @@ class BranchDialog(QDialog):
         self.layout.setContentsMargins(20, 20, 20, 20)
 
         # Tab or Dropdown selection for Action
-        self.action_label = QLabel("Select Action:")
+        self.action_label = make_translatable(QLabel(), "dialog.select_action")
         self.layout.addWidget(self.action_label)
 
         self.action_combo = QComboBox()
@@ -90,17 +92,17 @@ class BranchDialog(QDialog):
         add_lay.setContentsMargins(0, 0, 0, 0)
         add_lay.setSpacing(12)
 
-        add_lay.addWidget(QLabel("Branch Name:"))
+        add_lay.addWidget(make_translatable(QLabel(), "dialog.branch_name"))
         self.add_name_input = QLineEdit()
-        self.add_name_input.setPlaceholderText("e.g. Frontend Development")
+        self.add_name_input.setPlaceholderText(Translator.translate("placeholder.eg_frontend_development")); self.add_name_input.placeholder_translation_key = "placeholder.eg_frontend_development"
         add_lay.addWidget(self.add_name_input)
 
         # Colors selection
         color_row1 = QHBoxLayout()
         self.color_start_val = "#38BDF8"
-        self.btn_color_start = QPushButton("Pick Start Color")
+        self.btn_color_start = make_translatable(QPushButton(), "dialog.pick_start_color")
         self.btn_color_start.clicked.connect(lambda: self._pick_color("start"))
-        self.color_start_lbl = QLabel("Color: █")
+        self.color_start_lbl = make_translatable(QLabel(), "dialog.color")
         self.color_start_lbl.setStyleSheet(f"color: {self.color_start_val}; font-size: 16px;")
         color_row1.addWidget(self.btn_color_start)
         color_row1.addWidget(self.color_start_lbl)
@@ -108,15 +110,15 @@ class BranchDialog(QDialog):
 
         color_row2 = QHBoxLayout()
         self.color_end_val = "#3B82F6"
-        self.btn_color_end = QPushButton("Pick End Color")
+        self.btn_color_end = make_translatable(QPushButton(), "dialog.pick_end_color")
         self.btn_color_end.clicked.connect(lambda: self._pick_color("end"))
-        self.color_end_lbl = QLabel("Color: █")
+        self.color_end_lbl = make_translatable(QLabel(), "dialog.color")
         self.color_end_lbl.setStyleSheet(f"color: {self.color_end_val}; font-size: 16px;")
         color_row2.addWidget(self.btn_color_end)
         color_row2.addWidget(self.color_end_lbl)
         add_lay.addLayout(color_row2)
 
-        self.btn_add_submit = QPushButton("Add Branch")
+        self.btn_add_submit = make_translatable(QPushButton(), "dialog.add_branch")
         self.btn_add_submit.setObjectName("btnPrimary")
         self.btn_add_submit.clicked.connect(self._submit_add)
         add_lay.addWidget(self.btn_add_submit)
@@ -131,21 +133,21 @@ class BranchDialog(QDialog):
         edit_lay.setContentsMargins(0, 0, 0, 0)
         edit_lay.setSpacing(12)
 
-        edit_lay.addWidget(QLabel("Select Branch to Edit/Delete:"))
+        edit_lay.addWidget(make_translatable(QLabel(), "dialog.select_branch_to"))
         self.branch_combo = QComboBox()
         self.branch_combo.currentIndexChanged.connect(self._load_branch_details)
         edit_lay.addWidget(self.branch_combo)
 
-        edit_lay.addWidget(QLabel("New Name (Rename):"))
+        edit_lay.addWidget(make_translatable(QLabel(), "dialog.new_name_rename"))
         self.edit_name_input = QLineEdit()
         edit_lay.addWidget(self.edit_name_input)
 
         # Colors selection
         color_row3 = QHBoxLayout()
         self.edit_color_start_val = "#FFFFFF"
-        self.btn_edit_color_start = QPushButton("Pick Start Color")
+        self.btn_edit_color_start = make_translatable(QPushButton(), "dialog.pick_start_color")
         self.btn_edit_color_start.clicked.connect(lambda: self._pick_color("edit_start"))
-        self.edit_color_start_lbl = QLabel("Color: █")
+        self.edit_color_start_lbl = make_translatable(QLabel(), "dialog.color")
         self.edit_color_start_lbl.setStyleSheet(f"color: {self.edit_color_start_val}; font-size: 16px;")
         color_row3.addWidget(self.btn_edit_color_start)
         color_row3.addWidget(self.edit_color_start_lbl)
@@ -153,9 +155,9 @@ class BranchDialog(QDialog):
 
         color_row4 = QHBoxLayout()
         self.edit_color_end_val = "#FFFFFF"
-        self.btn_edit_color_end = QPushButton("Pick End Color")
+        self.btn_edit_color_end = make_translatable(QPushButton(), "dialog.pick_end_color")
         self.btn_edit_color_end.clicked.connect(lambda: self._pick_color("edit_end"))
-        self.edit_color_end_lbl = QLabel("Color: █")
+        self.edit_color_end_lbl = make_translatable(QLabel(), "dialog.color")
         self.edit_color_end_lbl.setStyleSheet(f"color: {self.edit_color_end_val}; font-size: 16px;")
         color_row4.addWidget(self.btn_edit_color_end)
         color_row4.addWidget(self.edit_color_end_lbl)
@@ -163,11 +165,11 @@ class BranchDialog(QDialog):
 
         # Action buttons
         btn_box = QHBoxLayout()
-        self.btn_edit_submit = QPushButton("Save Changes")
+        self.btn_edit_submit = make_translatable(QPushButton(), "dialog.save_changes")
         self.btn_edit_submit.setObjectName("btnPrimary")
         self.btn_edit_submit.clicked.connect(self._submit_edit)
         
-        self.btn_delete = QPushButton("Delete Branch")
+        self.btn_delete = make_translatable(QPushButton(), "dialog.delete_branch")
         self.btn_delete.setObjectName("btnDelete")
         self.btn_delete.clicked.connect(self._submit_delete)
         
@@ -226,7 +228,7 @@ class BranchDialog(QDialog):
     def _submit_add(self):
         name = self.add_name_input.text().strip()
         if not name:
-            QMessageBox.warning(self, "Validation Error", "Branch Name cannot be empty.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.branch_name_cannot"))
             return
 
         success = skill_tree_db.add_branch(name, self.color_start_val, self.color_end_val)
@@ -235,7 +237,7 @@ class BranchDialog(QDialog):
             self.add_name_input.clear()
             self.accept()
         else:
-            QMessageBox.warning(self, "Error", "Branch Name already exists.")
+            QMessageBox.warning(self, Translator.translate("msg.title.error"), Translator.translate("msg.text.branch_name_already"))
 
     def _submit_edit(self):
         b = self.branch_combo.currentData()
@@ -244,16 +246,16 @@ class BranchDialog(QDialog):
         
         new_name = self.edit_name_input.text().strip()
         if not new_name:
-            QMessageBox.warning(self, "Validation Error", "Branch Name cannot be empty.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.branch_name_cannot"))
             return
 
         success = skill_tree_db.update_branch(b["name"], new_name, self.edit_color_start_val, self.edit_color_end_val)
         if success:
-            QMessageBox.information(self, "Success", "Branch updated successfully!")
+            QMessageBox.information(self, Translator.translate("msg.title.success"), Translator.translate("msg.text.branch_updated_successfully"))
             self._refresh_branches()
             self.accept()
         else:
-            QMessageBox.warning(self, "Error", "Could not update branch. Check if the name collides.")
+            QMessageBox.warning(self, Translator.translate("msg.title.error"), Translator.translate("msg.text.could_not_update"))
 
     def _submit_delete(self):
         b = self.branch_combo.currentData()
@@ -267,6 +269,6 @@ class BranchDialog(QDialog):
         )
         if reply == QMessageBox.StandardButton.Yes:
             skill_tree_db.delete_branch(b["name"])
-            QMessageBox.information(self, "Success", "Branch deleted successfully!")
+            QMessageBox.information(self, Translator.translate("msg.title.success"), Translator.translate("msg.text.branch_deleted_successfully"))
             self._refresh_branches()
             self.accept()

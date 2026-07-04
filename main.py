@@ -34,9 +34,11 @@ class MainWindow(QMainWindow):
         worker.start_worker()
         self.on_logout_callback = on_logout
         self.is_dark_mode = False
-        self.setWindowTitle("AI-Career Bridge")
         self.resize(1350, 850)
         self.setMinimumSize(1000, 700)
+        
+        from core.translation.translator import language_signal
+        language_signal.language_changed.connect(self.retranslate_ui)
 
         # 1. MAIN LAYOUT
         self.central_widget = QWidget()
@@ -174,7 +176,21 @@ class MainWindow(QMainWindow):
                 recruitment_page.cleanup()
         except Exception as e:
             print(f"Error during recruitment cleanup: {e}")
+            
+        try:
+            from core.translation.translator import language_signal
+            language_signal.language_changed.disconnect(self.retranslate_ui)
+        except Exception:
+            pass
         event.accept()
+
+    def retranslate_ui(self):
+        from core.translation.translator import Translator
+        self.setWindowTitle(Translator.translate("app.title"))
+        
+        # Retranslate the sidebar items
+        if hasattr(self, "sidebar") and self.sidebar:
+            self.sidebar.retranslate_ui()
 
 
 class ComingSoonPage(QWidget):
@@ -312,6 +328,15 @@ sys.excepthook = global_exception_handler
 if __name__ == "__main__":
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
     app = QApplication(sys.argv)
+
+    # QUAN TRỌNG: Dùng Fusion style để QSS kiểm soát scrollbar trên Windows.
+    # Windows platform style (QWindowsVistaStyle) bỏ qua QSS cho QScrollBar.
+    # Fusion là cross-platform style tôn trọng toàn bộ QSS bao gồm scrollbar.
+    app.setStyle("Fusion")
+
+    # Load i18n languages on startup
+    from core.translation.translator import Translator
+    Translator.load_languages()
 
     font = QFont("Segoe UI", 10)
     if sys.platform == "darwin":

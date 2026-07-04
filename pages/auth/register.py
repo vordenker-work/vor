@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 import sys
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QSpacerItem, QSizePolicy, QLineEdit,
@@ -16,7 +18,7 @@ COLOR_TEXT_SECONDARY = "#64748B"
 COLOR_BORDER = "#E2E8F0"
 
 
-class FeatureCard(QFrame):
+class FeatureCard(BaseTranslatableFrame):
     def __init__(self, title, desc, icon, parent=None):
         super().__init__(parent)
         self.setFixedHeight(80)
@@ -60,7 +62,7 @@ class FeatureCard(QFrame):
         layout.addStretch()
 
 
-class ModernInput(QWidget):
+class ModernInput(BaseTranslatableWidget):
     def __init__(self, label, placeholder, icon="", is_password=False, parent=None):
         super().__init__(parent)
         layout = QVBoxLayout(self)
@@ -112,7 +114,7 @@ class ModernInput(QWidget):
         cont_layout.addWidget(self.line_edit)
 
         if is_password:
-            self.toggle_btn = QPushButton("👁")
+            self.toggle_btn = make_translatable(QPushButton(), "ui.label_3")
             self.toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             self.toggle_btn.setStyleSheet(
                 f"color: {COLOR_TEXT_SECONDARY}; font-size: 16px; border: none; background: transparent;")
@@ -147,7 +149,7 @@ class ModernInput(QWidget):
             self.toggle_btn.setText("🔒")
         else:
             self.line_edit.setEchoMode(QLineEdit.EchoMode.Password)
-            self.toggle_btn.setText("👁")
+            self.toggle_btn.setText(Translator.translate("ui.label_3")); self.toggle_btn.translation_key = "ui.label_3"
 
     def text(self):
         return self.line_edit.text()
@@ -188,7 +190,7 @@ class SocialButton(QPushButton):
         """)
 
 
-class ProgressStepper(QWidget):
+class ProgressStepper(BaseTranslatableWidget):
     def __init__(self, steps, current_step=0, parent=None):
         super().__init__(parent)
         layout = QHBoxLayout(self)
@@ -258,13 +260,13 @@ class ProgressStepper(QWidget):
             layout.addLayout(step_container)
 
 
-class RegisterPage(QWidget):
+class RegisterPage(BaseTranslatableWidget):
     def __init__(self, parent=None, on_back_click=None, on_register=None):
         super().__init__(parent)
         self.on_back_click = on_back_click
         self.on_register = on_register
 
-        self.setWindowTitle("AI-Career Bridge - Create Account")
+        self.setWindowTitle(Translator.translate("title.aicareer_bridge_create"))
         self.setStyleSheet(f"background-color: {COLOR_BG}; font-family: '{FONT_FAMILY}', sans-serif;")
 
         # --- 1. Master Wrapper Layout ---
@@ -301,9 +303,9 @@ class RegisterPage(QWidget):
         # Logo Area
         logo_layout = QHBoxLayout()
         logo_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        logo_icon = QLabel("✧")
+        logo_icon = make_translatable(QLabel(), "ui.str_12")
         logo_icon.setStyleSheet(f"color: {COLOR_PRIMARY}; font-size: 28px;")
-        logo_text = QLabel("AI-Career Bridge")
+        logo_text = make_translatable(QLabel(), "sidebar.title")
         logo_text.setStyleSheet(
             f"color: {COLOR_TEXT_PRIMARY}; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;")
         logo_layout.addWidget(logo_icon)
@@ -313,14 +315,14 @@ class RegisterPage(QWidget):
         left_layout.addSpacing(60)
 
         # Hero Text
-        title = QLabel("Start Building Your\nCareer Journey.")
+        title = make_translatable(QLabel(), "ui.start_building_yourncareer")
         title.setStyleSheet(
             f"color: {COLOR_TEXT_PRIMARY}; font-size: 42px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1;")
         left_layout.addWidget(title)
 
         left_layout.addSpacing(15)
 
-        subtitle = QLabel("Join thousands of professionals accelerating\ntheir growth with AI.")
+        subtitle = make_translatable(QLabel(), "ui.join_thousands_of")
         subtitle.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 18px; font-weight: 500; line-height: 1.4;")
         left_layout.addWidget(subtitle)
 
@@ -348,7 +350,7 @@ class RegisterPage(QWidget):
         status_layout.setSpacing(10)
         status_dot = QLabel("●")
         status_dot.setStyleSheet("color: #10B981; font-size: 10px;")
-        status_text = QLabel("System Online • v2.4.0")
+        status_text = make_translatable(QLabel(), "ui.system_online_v240")
         status_text.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 12px; font-weight: 500;")
         status_layout.addWidget(status_dot)
         status_layout.addWidget(status_text)
@@ -369,14 +371,14 @@ class RegisterPage(QWidget):
         # Top Right Controls
         top_controls = QHBoxLayout()
         top_controls.addStretch()
-        lang_btn = QPushButton("EN ▾")
+        lang_btn = make_translatable(QPushButton(), "ui.en")
         lang_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         lang_btn.setStyleSheet(
             f"color: {COLOR_TEXT_SECONDARY}; font-size: 13px; font-weight: 600; border: none; background: transparent;")
         top_controls.addWidget(lang_btn)
 
         # Floating Help Widget Mock
-        help_btn = QPushButton("? Need Help")
+        help_btn = make_translatable(QPushButton(), "ui.need_help")
         help_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         help_btn.setStyleSheet(
             f"color: {COLOR_TEXT_SECONDARY}; font-size: 13px; font-weight: 600; border: none; background: transparent; padding-left: 15px;")
@@ -408,11 +410,11 @@ class RegisterPage(QWidget):
         header_layout = QVBoxLayout()
         header_layout.setSpacing(6)
 
-        title_lbl = QLabel("Create Account")
+        title_lbl = make_translatable(QLabel(), "ui.create_account")
         title_lbl.setStyleSheet(
             f"color: {COLOR_TEXT_PRIMARY}; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;")
 
-        subtitle_lbl = QLabel("Start your new journey. No gimmicks. No pretentious.")
+        subtitle_lbl = make_translatable(QLabel(), "ui.start_your_new")
         subtitle_lbl.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 14px; font-weight: 500;")
 
         header_layout.addWidget(title_lbl)
@@ -448,7 +450,7 @@ class RegisterPage(QWidget):
         # Student Year dropdown
         year_container = QVBoxLayout()
         year_container.setSpacing(6)
-        year_lbl = QLabel("Student Year")
+        year_lbl = make_translatable(QLabel(), "ui.student_year")
         year_lbl.setStyleSheet(f"color: {COLOR_TEXT_PRIMARY}; font-size: 13px; font-weight: 600;")
         self.year_combo = QComboBox()
         self.year_combo.setFixedHeight(44)
@@ -470,7 +472,7 @@ class RegisterPage(QWidget):
         card_layout.addWidget(self.lbl_error)
 
         # Primary Action Button
-        self.create_btn = QPushButton("Create Account")
+        self.create_btn = make_translatable(QPushButton(), "ui.create_account")
         self.create_btn.setFixedHeight(48)
         self.create_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.create_btn.setStyleSheet(f"""
@@ -500,7 +502,7 @@ class RegisterPage(QWidget):
         line2 = QFrame();
         line2.setFrameShape(QFrame.Shape.HLine);
         line2.setStyleSheet(f"color: {COLOR_BORDER};")
-        or_lbl = QLabel("or continue with")
+        or_lbl = make_translatable(QLabel(), "ui.or_continue_with")
         or_lbl.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 12px; font-weight: 500;")
         divider_layout.addWidget(line1)
         divider_layout.addWidget(or_lbl)
@@ -520,10 +522,10 @@ class RegisterPage(QWidget):
         # Bottom Footer Action
         footer_layout = QHBoxLayout()
         footer_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        footer_text = QLabel("Already have an account?")
+        footer_text = make_translatable(QLabel(), "ui.already_have_an")
         footer_text.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 14px; font-weight: 500;")
 
-        self.signin_btn = QPushButton("Sign In")
+        self.signin_btn = make_translatable(QPushButton(), "ui.sign_in")
         self.signin_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.signin_btn.setStyleSheet(f"""
             QPushButton {{ color: {COLOR_TEXT_PRIMARY}; font-weight: 700; font-size: 14px; border: none; background: transparent; }}
@@ -559,13 +561,13 @@ class RegisterPage(QWidget):
         student_year = self.year_combo.currentData()
 
         if not email or not username or not password:
-            self.lbl_error.setText("Email, username, and password are required.")
+            self.lbl_error.setText(Translator.translate("ui.email_username_and")); self.lbl_error.translation_key = "ui.email_username_and"
             self.lbl_error.show()
             return
 
         self.lbl_error.hide()
         self.create_btn.setEnabled(False)
-        self.create_btn.setText("Creating Account...")
+        self.create_btn.setText(Translator.translate("ui.creating_account")); self.create_btn.translation_key = "ui.creating_account"
 
         from modules.auth_worker import RegisterWorker
         self.worker = RegisterWorker(
@@ -582,13 +584,13 @@ class RegisterPage(QWidget):
 
     def _on_register_success(self, res):
         self.create_btn.setEnabled(True)
-        self.create_btn.setText("Create Account")
+        self.create_btn.setText(Translator.translate("ui.create_account")); self.create_btn.translation_key = "ui.create_account"
         if self.on_register:
             self.on_register(res)
 
     def _on_register_error(self, err_msg):
         self.create_btn.setEnabled(True)
-        self.create_btn.setText("Create Account")
+        self.create_btn.setText(Translator.translate("ui.create_account")); self.create_btn.translation_key = "ui.create_account"
         self.lbl_error.setText(err_msg)
         self.lbl_error.show()
 

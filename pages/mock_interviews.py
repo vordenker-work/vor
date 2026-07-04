@@ -1,3 +1,4 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
     QFrame, QScrollArea, QGraphicsDropShadowEffect, QGridLayout, QMessageBox, QDialog
@@ -6,7 +7,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QFont
 from database import crud
 
-class ClickableCard(QFrame):
+class ClickableCard(BaseTranslatableFrame):
     def __init__(self, title, desc, icon, color, on_click, parent=None):
         super().__init__(parent)
         self.setObjectName("ClickableCard")
@@ -61,7 +62,7 @@ class ClickableCard(QFrame):
             self.on_click(self.title)
         super().mousePressEvent(event)
 
-class MockInterviewsPage(QWidget):
+class MockInterviewsPage(BaseTranslatableWidget):
     def __init__(self, parent=None, controller=None):
         super().__init__(parent)
         self.controller = controller
@@ -79,12 +80,12 @@ class MockInterviewsPage(QWidget):
         header_layout.setContentsMargins(24, 0, 24, 0)
         header_layout.setSpacing(16)
         
-        title_lbl = QLabel("🎙 Mock Interviews")
+        title_lbl = make_translatable(QLabel(), "nav.mock_interviews")
         title_lbl.setStyleSheet("font-size: 16px; font-weight: 800; color: #0F172A; border: none;")
         header_layout.addWidget(title_lbl)
         header_layout.addStretch()
         
-        btn_practice = QPushButton("Start AI Voice Interview")
+        btn_practice = make_translatable(QPushButton(), "ui.start_ai_voice")
         btn_practice.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_practice.setStyleSheet("""
             QPushButton {
@@ -110,7 +111,7 @@ class MockInterviewsPage(QWidget):
         content_layout.setSpacing(24)
         
         # Select category header
-        cat_title = QLabel("Select Interview Type")
+        cat_title = make_translatable(QLabel(), "ui.select_interview_type")
         cat_title.setStyleSheet("color: #0F172A; font-size: 16px; font-weight: 700;")
         content_layout.addWidget(cat_title)
         
@@ -137,7 +138,7 @@ class MockInterviewsPage(QWidget):
         content_layout.addLayout(grid)
         
         # Past Performance
-        past_title = QLabel("Recent Interview Feedback")
+        past_title = make_translatable(QLabel(), "ui.recent_interview_feedback")
         past_title.setStyleSheet("color: #0F172A; font-size: 16px; font-weight: 700; margin-top: 10px;")
         content_layout.addWidget(past_title)
         
@@ -158,7 +159,7 @@ class MockInterviewsPage(QWidget):
     def _start_interview_flow(self, category):
         student = crud.get_current_student()
         if not student:
-            QMessageBox.warning(self, "Lỗi", "Vui lòng đăng nhập hệ thống để thực hiện phỏng vấn.")
+            QMessageBox.warning(self, Translator.translate("msg.title.loi"), Translator.translate("msg.text.vui_long_dang"))
             return
             
         from pages.mock_interview_dialog import MockInterviewDialog
@@ -175,14 +176,14 @@ class MockInterviewsPage(QWidget):
                 
         student = crud.get_current_student()
         if not student:
-            lbl_empty = QLabel("Vui lòng đăng nhập để xem lịch sử phỏng vấn.")
+            lbl_empty = make_translatable(QLabel(), "ui.vui_long_dang")
             lbl_empty.setStyleSheet("color: #64748B; font-size: 13px; font-style: italic;")
             self.feedback_lay.addWidget(lbl_empty)
             return
             
         interviews = crud.get_mock_interviews(student["id"])
         if not interviews:
-            lbl_empty = QLabel("Chưa thực hiện cuộc phỏng vấn nào. Hãy chọn một chủ đề phía trên để bắt đầu thử sức!")
+            lbl_empty = make_translatable(QLabel(), "ui.chua_thuc_hien")
             lbl_empty.setStyleSheet("color: #64748B; font-size: 13px; font-style: italic; border: none; background: transparent;")
             self.feedback_lay.addWidget(lbl_empty)
             return

@@ -1,8 +1,9 @@
+from core.translation.base_translatable_widget import BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
 from PyQt6.QtWidgets import QLabel, QFrame, QVBoxLayout, QGraphicsDropShadowEffect
 from PyQt6.QtCore import Qt, QPoint, QTimer, QPropertyAnimation, QEasingCurve
 from PyQt6.QtGui import QColor, QFont
 
-class ModernTooltip(QFrame):
+class ModernTooltip(BaseTranslatableFrame):
     def __init__(self, text, parent=None):
         super().__init__(parent, Qt.WindowType.ToolTip | Qt.WindowType.FramelessWindowHint | Qt.WindowType.NoDropShadowWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)

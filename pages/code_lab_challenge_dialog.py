@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 import json
 import re
 from PyQt6.QtWidgets import (
@@ -8,10 +10,10 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from database import code_lab_db
 
-class AddChallengeDialog(QDialog):
+class AddChallengeDialog(BaseTranslatableDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Add New Programming Challenge")
+        self.setWindowTitle(Translator.translate("title.add_new_programming"))
         self.resize(520, 720)
         self.test_cases_rows = []
 
@@ -85,49 +87,49 @@ class AddChallengeDialog(QDialog):
         self.layout.setContentsMargins(20, 20, 20, 20)
 
         # 1. Challenge Title
-        self.layout.addWidget(QLabel("Challenge Title:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.challenge_title"))
         self.title_input = QLineEdit()
-        self.title_input.setPlaceholderText("e.g. Find Maximum Number")
+        self.title_input.setPlaceholderText(Translator.translate("placeholder.eg_find_maximum")); self.title_input.placeholder_translation_key = "placeholder.eg_find_maximum"
         self.layout.addWidget(self.title_input)
 
         # 2. Topic/Category
-        self.layout.addWidget(QLabel("Topic/Category:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.topiccategory"))
         self.topic_input = QLineEdit()
-        self.topic_input.setPlaceholderText("e.g. Array, Math, String")
+        self.topic_input.setPlaceholderText(Translator.translate("placeholder.eg_array_math")); self.topic_input.placeholder_translation_key = "placeholder.eg_array_math"
         self.layout.addWidget(self.topic_input)
 
         # 3. Difficulty
-        self.layout.addWidget(QLabel("Difficulty Level:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.difficulty_level"))
         self.diff_combo = QComboBox()
         self.diff_combo.addItems(["Easy", "Medium", "Hard"])
         self.layout.addWidget(self.diff_combo)
 
         # 4. Description (HTML supported)
-        self.layout.addWidget(QLabel("Description (HTML supported):"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.description_html_supported"))
         self.desc_input = QTextEdit()
-        self.desc_input.setPlaceholderText("Write details here... e.g. Given a list <code>nums</code>, return the largest number.")
+        self.desc_input.setPlaceholderText(Translator.translate("placeholder.write_details_here")); self.desc_input.placeholder_translation_key = "placeholder.write_details_here"
         self.desc_input.setMinimumHeight(100)
         self.layout.addWidget(self.desc_input)
 
         # 5. Starter Code
-        self.layout.addWidget(QLabel("Starter Code Template:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.starter_code_template"))
         self.starter_input = QTextEdit()
         self.starter_input.setFont(QFont("Consolas", 11))
-        self.starter_input.setPlaceholderText("def find_max(nums):\n    # Write your code here\n    pass")
+        self.starter_input.setPlaceholderText(Translator.translate("placeholder.def_findmaxnumsn_write")); self.starter_input.placeholder_translation_key = "placeholder.def_findmaxnumsn_write"
         self.starter_input.setMinimumHeight(120)
         self.layout.addWidget(self.starter_input)
 
         # 6. Test Cases Section
-        self.layout.addWidget(QLabel("Test Cases (Inputs must be JSON Lists; Outputs JSON values):"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.test_cases_inputs"))
         
         # Header Row
         header_widget = QWidget()
         header_lay = QHBoxLayout(header_widget)
         header_lay.setContentsMargins(0, 0, 0, 0)
         header_lay.setSpacing(8)
-        lbl_in = QLabel("Input Args (JSON List)")
+        lbl_in = make_translatable(QLabel(), "dialog.input_args_json")
         lbl_in.setStyleSheet("color: #64748B; font-size: 11px;")
-        lbl_out = QLabel("Expected Output (JSON)")
+        lbl_out = make_translatable(QLabel(), "dialog.expected_output_json")
         lbl_out.setStyleSheet("color: #64748B; font-size: 11px;")
         header_lay.addWidget(lbl_in, 2)
         header_lay.addWidget(lbl_out, 1)
@@ -142,7 +144,7 @@ class AddChallengeDialog(QDialog):
         self.layout.addWidget(self.cases_container)
 
         # Add Test Case button
-        self.btn_add_case = QPushButton("➕ Add Test Case")
+        self.btn_add_case = make_translatable(QPushButton(), "dialog.add_test_case")
         self.btn_add_case.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_add_case.setStyleSheet("""
             QPushButton {
@@ -174,7 +176,7 @@ class AddChallengeDialog(QDialog):
         
         footer_layout.addStretch()
         
-        self.btn_cancel = QPushButton("Cancel")
+        self.btn_cancel = make_translatable(QPushButton(), "button.cancel")
         self.btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_cancel.setStyleSheet("""
             QPushButton {
@@ -193,7 +195,7 @@ class AddChallengeDialog(QDialog):
         self.btn_cancel.clicked.connect(self.reject)
         footer_layout.addWidget(self.btn_cancel)
         
-        self.btn_save = QPushButton("Save Challenge")
+        self.btn_save = make_translatable(QPushButton(), "dialog.save_challenge")
         self.btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_save.setStyleSheet("""
             QPushButton {
@@ -224,11 +226,11 @@ class AddChallengeDialog(QDialog):
         row_lay.setSpacing(8)
         
         input_input = QLineEdit()
-        input_input.setPlaceholderText("e.g. [[1, 5, 3]] or [2, 3]")
+        input_input.setPlaceholderText(Translator.translate("placeholder.eg_1_5"))
         input_input.setText(input_val)
         
         output_input = QLineEdit()
-        output_input.setPlaceholderText("e.g. 5")
+        output_input.setPlaceholderText(Translator.translate("placeholder.eg_5"))
         output_input.setText(output_val)
         
         btn_del = QPushButton("🗑️")
@@ -264,7 +266,7 @@ class AddChallengeDialog(QDialog):
 
     def remove_test_case_row(self, row_data):
         if len(self.test_cases_rows) <= 1:
-            QMessageBox.warning(self, "Validation Error", "You must keep at least 1 test case.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.you_must_keep"))
             return
             
         self.test_cases_rows.remove(row_data)
@@ -278,16 +280,16 @@ class AddChallengeDialog(QDialog):
         starter = self.starter_input.toPlainText().strip()
         
         if not title:
-            QMessageBox.warning(self, "Validation Error", "Challenge Title cannot be empty.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.challenge_title_cannot"))
             return
         if not topic:
-            QMessageBox.warning(self, "Validation Error", "Topic cannot be empty.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.topic_cannot_be"))
             return
         if not desc:
-            QMessageBox.warning(self, "Validation Error", "Description cannot be empty.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.description_cannot_be"))
             return
         if not starter:
-            QMessageBox.warning(self, "Validation Error", "Starter Code cannot be empty.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.starter_code_cannot"))
             return
             
         parsed_cases = []

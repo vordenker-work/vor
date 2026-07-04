@@ -1,9 +1,11 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, QSizePolicy, QGridLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, QSizePolicy, QGridLayout, QRadioButton, QButtonGroup
 from PyQt6.QtCore import Qt
 from ui_core.components import SaaSCard, ModernSwitch
 from database import crud
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget
+from core.translation.translator import Translator
 
-class SettingsPage(QWidget):
+class SettingsPage(BaseTranslatableWidget):
     def __init__(self, controller=None, parent=None):
         super().__init__(parent)
         self.controller = controller
@@ -33,6 +35,7 @@ class SettingsPage(QWidget):
         left_col.addWidget(self._create_profile_card())
         left_col.addWidget(self._create_preferences_card())
         
+        right_col.addWidget(self._create_language_card())
         right_col.addWidget(self._create_sync_card())
         right_col.addWidget(self._create_danger_zone_card())
         
@@ -40,6 +43,7 @@ class SettingsPage(QWidget):
         self.content_layout.addLayout(right_col, 1)
         
         self.main_layout.addWidget(self.content_container, stretch=1)
+        self.retranslate_ui()
         
     def _setup_header(self):
         header = QFrame()
@@ -53,14 +57,14 @@ class SettingsPage(QWidget):
         info.setSpacing(4)
         info.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         
-        title = QLabel("Settings")
-        title.setStyleSheet("font-size: 20px; font-weight: 800; color: #0F172A; border: none;")
+        self.title_lbl = QLabel()
+        self.title_lbl.setStyleSheet("font-size: 20px; font-weight: 800; color: #0F172A; border: none;")
         
-        sub = QLabel("Manage your account, UI preferences, and local data sync.")
-        sub.setStyleSheet("font-size: 13px; font-weight: 500; color: #64748B; border: none;")
+        self.sub_lbl = QLabel()
+        self.sub_lbl.setStyleSheet("font-size: 13px; font-weight: 500; color: #64748B; border: none;")
         
-        info.addWidget(title)
-        info.addWidget(sub)
+        info.addWidget(self.title_lbl)
+        info.addWidget(self.sub_lbl)
         layout.addLayout(info)
         layout.addStretch()
         
@@ -70,9 +74,9 @@ class SettingsPage(QWidget):
         card = SaaSCard(self)
         layout = card.internal_layout
         
-        title = QLabel("Account Profile")
-        title.setStyleSheet("font-size: 16px; font-weight: 800; color: #0F172A; background: transparent; border: none;")
-        layout.addWidget(title)
+        self.profile_title_lbl = QLabel()
+        self.profile_title_lbl.setStyleSheet("font-size: 16px; font-weight: 800; color: #0F172A; background: transparent; border: none;")
+        layout.addWidget(self.profile_title_lbl)
         layout.addSpacing(8)
         
         student = crud.get_current_student()
@@ -84,7 +88,7 @@ class SettingsPage(QWidget):
         prof_row = QHBoxLayout()
         prof_row.setSpacing(16)
         
-        avatar = QLabel(name_str[0].upper())
+        avatar = QLabel(name_str[0].upper() if name_str else "?")
         avatar.setFixedSize(56, 56)
         avatar.setAlignment(Qt.AlignmentFlag.AlignCenter)
         avatar.setStyleSheet("""
@@ -104,15 +108,15 @@ class SettingsPage(QWidget):
         prof_row.addLayout(info_v)
         prof_row.addStretch()
         
-        btn_edit = QPushButton("Edit Profile")
-        btn_edit.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_edit.setStyleSheet("""
+        self.btn_edit_profile = QPushButton()
+        self.btn_edit_profile.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_edit_profile.setStyleSheet("""
             QPushButton { background: white; color: #0F172A; border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 12px; }
             QPushButton:hover { background: #F8FAFC; }
         """)
         if self.controller and hasattr(self.controller, 'show_page'):
-            btn_edit.clicked.connect(lambda: self.controller.show_page(1)) # Redirect to Profile
-        prof_row.addWidget(btn_edit, alignment=Qt.AlignmentFlag.AlignTop)
+            self.btn_edit_profile.clicked.connect(lambda: self.controller.show_page("ProfilePage"))
+        prof_row.addWidget(self.btn_edit_profile, alignment=Qt.AlignmentFlag.AlignTop)
         
         layout.addLayout(prof_row)
         return card
@@ -121,9 +125,9 @@ class SettingsPage(QWidget):
         card = SaaSCard(self)
         layout = card.internal_layout
         
-        title = QLabel("UI & Preferences")
-        title.setStyleSheet("font-size: 16px; font-weight: 800; color: #0F172A; background: transparent; border: none;")
-        layout.addWidget(title)
+        self.pref_title_lbl = QLabel()
+        self.pref_title_lbl.setStyleSheet("font-size: 16px; font-weight: 800; color: #0F172A; background: transparent; border: none;")
+        layout.addWidget(self.pref_title_lbl)
         
         def add_toggle(text, subtext, default_state=True):
             row = QHBoxLayout()
@@ -136,7 +140,7 @@ class SettingsPage(QWidget):
             v.addWidget(t)
             v.addWidget(s)
             
-            toggle = ModernSwitch(active_color="#10B981") # Emerald Green
+            toggle = ModernSwitch(active_color="#10B981")
             toggle.set_checked(default_state)
             
             row.addLayout(v)
@@ -151,19 +155,55 @@ class SettingsPage(QWidget):
         
         return card
 
+    def _create_language_card(self):
+        card = SaaSCard(self)
+        layout = card.internal_layout
+        
+        self.lang_title_lbl = QLabel()
+        self.lang_title_lbl.setStyleSheet("font-size: 16px; font-weight: 800; color: #0F172A; background: transparent; border: none;")
+        layout.addWidget(self.lang_title_lbl)
+        layout.addSpacing(12)
+        
+        self.radio_en = make_translatable(QRadioButton(), "settings.lang.en")
+        self.radio_en.setStyleSheet("QRadioButton { font-size: 13px; color: #334155; font-weight: 500; background: transparent; }")
+        self.radio_en.setCursor(Qt.CursorShape.PointingHandCursor)
+        
+        self.radio_vi = make_translatable(QRadioButton(), "settings.lang.vi")
+        self.radio_vi.setStyleSheet("QRadioButton { font-size: 13px; color: #334155; font-weight: 500; background: transparent; }")
+        self.radio_vi.setCursor(Qt.CursorShape.PointingHandCursor)
+        
+        layout.addWidget(self.radio_en)
+        layout.addWidget(self.radio_vi)
+        
+        # Select active language
+        current_lang = Translator.current_language()
+        if current_lang == "vi":
+            self.radio_vi.setChecked(True)
+        else:
+            self.radio_en.setChecked(True)
+            
+        # Bind toggle actions
+        self.radio_en.toggled.connect(lambda checked: checked and self._change_lang("en"))
+        self.radio_vi.toggled.connect(lambda checked: checked and self._change_lang("vi"))
+        
+        return card
+
+    def _change_lang(self, lang_code):
+        Translator.set_language(lang_code)
+
     def _create_sync_card(self):
         card = SaaSCard(self)
         layout = card.internal_layout
         
-        title = QLabel("System & Data Sync")
-        title.setStyleSheet("font-size: 16px; font-weight: 800; color: #0F172A; background: transparent; border: none;")
-        layout.addWidget(title)
+        self.sync_title_lbl = QLabel()
+        self.sync_title_lbl.setStyleSheet("font-size: 16px; font-weight: 800; color: #0F172A; background: transparent; border: none;")
+        layout.addWidget(self.sync_title_lbl)
         layout.addSpacing(12)
         
-        desc = QLabel("VOR uses a Local-First architecture. Your AI plans and CVs are saved locally in SQLite and synchronized in the background to the cloud.")
-        desc.setWordWrap(True)
-        desc.setStyleSheet("color: #64748B; font-size: 13px; line-height: 1.5; background: transparent;")
-        layout.addWidget(desc)
+        self.sync_desc_lbl = QLabel()
+        self.sync_desc_lbl.setWordWrap(True)
+        self.sync_desc_lbl.setStyleSheet("color: #64748B; font-size: 13px; line-height: 1.5; background: transparent;")
+        layout.addWidget(self.sync_desc_lbl)
         
         layout.addSpacing(16)
         status_box = QFrame()
@@ -174,11 +214,11 @@ class SettingsPage(QWidget):
         icon = QLabel("●")
         icon.setStyleSheet("color: #16A34A; font-size: 14px; background: transparent; border: none;")
         
-        lbl = QLabel("Background Sync is Active")
-        lbl.setStyleSheet("color: #16A34A; font-size: 13px; font-weight: 700; background: transparent; border: none;")
+        self.sync_status_lbl = QLabel()
+        self.sync_status_lbl.setStyleSheet("color: #16A34A; font-size: 13px; font-weight: 700; background: transparent; border: none;")
         
         sb_layout.addWidget(icon)
-        sb_layout.addWidget(lbl)
+        sb_layout.addWidget(self.sync_status_lbl)
         sb_layout.addStretch()
         
         layout.addWidget(status_box)
@@ -189,39 +229,56 @@ class SettingsPage(QWidget):
         card.setStyleSheet(card.styleSheet() + " #SaaSCard { border: 1px solid #FECACA; }")
         layout = card.internal_layout
         
-        title = QLabel("Danger Zone")
-        title.setStyleSheet("font-size: 16px; font-weight: 800; color: #DC2626; background: transparent; border: none;")
-        layout.addWidget(title)
+        self.danger_title_lbl = QLabel()
+        self.danger_title_lbl.setStyleSheet("font-size: 16px; font-weight: 800; color: #DC2626; background: transparent; border: none;")
+        layout.addWidget(self.danger_title_lbl)
         layout.addSpacing(12)
         
-        desc = QLabel("These actions cannot be undone. Please be certain before proceeding.")
-        desc.setStyleSheet("color: #64748B; font-size: 13px; background: transparent;")
-        layout.addWidget(desc)
+        self.danger_desc_lbl = QLabel()
+        self.danger_desc_lbl.setStyleSheet("color: #64748B; font-size: 13px; background: transparent;")
+        layout.addWidget(self.danger_desc_lbl)
         
         layout.addSpacing(16)
         
-        # Clear Cache Button
-        btn_clear = QPushButton("Clear Local Cache")
-        btn_clear.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_clear.setStyleSheet("""
+        self.btn_clear_cache = QPushButton()
+        self.btn_clear_cache.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_clear_cache.setStyleSheet("""
             QPushButton { background: white; color: #DC2626; border: 1px solid #FECACA; border-radius: 6px; padding: 10px 16px; font-weight: 700; font-size: 13px; text-align: left; }
             QPushButton:hover { background: #FEF2F2; }
         """)
         
-        # Logout Button
-        btn_logout = QPushButton("Log Out of Session")
-        btn_logout.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_logout.setStyleSheet("""
+        self.btn_logout = QPushButton()
+        self.btn_logout.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_logout.setStyleSheet("""
             QPushButton { background: #EF4444; color: white; border: none; border-radius: 6px; padding: 10px 16px; font-weight: 700; font-size: 13px; text-align: left; }
             QPushButton:hover { background: #DC2626; }
         """)
-        btn_logout.clicked.connect(self._handle_logout)
+        self.btn_logout.clicked.connect(self._handle_logout)
         
-        layout.addWidget(btn_clear)
-        layout.addWidget(btn_logout)
+        layout.addWidget(self.btn_clear_cache)
+        layout.addWidget(self.btn_logout)
         
         return card
 
     def _handle_logout(self):
         if self.controller and hasattr(self.controller, 'logout'):
             self.controller.logout()
+
+    def retranslate_ui(self):
+        """Retranslates all visible texts in SettingsPage on language changed."""
+        self.title_lbl.setText(Translator.translate("settings.title", "Settings & Preferences"))
+        self.sub_lbl.setText(Translator.translate("settings.description", "Manage your account, UI preferences, and local data sync."))
+        
+        self.profile_title_lbl.setText(Translator.translate("settings.section.profile", "Account Profile"))
+        self.pref_title_lbl.setText(Translator.translate("settings.section.preferences", "UI & Preferences"))
+        self.lang_title_lbl.setText(Translator.translate("settings.section.language", "Language / Ngôn ngữ"))
+        self.sync_title_lbl.setText(Translator.translate("settings.section.sync", "System & Data Sync"))
+        self.danger_title_lbl.setText(Translator.translate("settings.section.danger", "Danger Zone"))
+        
+        self.sync_desc_lbl.setText(Translator.translate("settings.sync.description", "VOR uses a Local-First architecture. Your AI plans and CVs are saved locally in SQLite and synchronized in the background to the cloud."))
+        self.sync_status_lbl.setText(Translator.translate("settings.sync.status", "Background Sync is Active"))
+        self.danger_desc_lbl.setText(Translator.translate("settings.danger.description", "These actions cannot be undone. Please be certain before proceeding."))
+        
+        self.btn_edit_profile.setText(Translator.translate("settings.btn.edit_profile", "Edit Profile"))
+        self.btn_clear_cache.setText(Translator.translate("settings.btn.clear_cache", "Clear Local Cache"))
+        self.btn_logout.setText(Translator.translate("settings.btn.logout", "Log Out of Session"))

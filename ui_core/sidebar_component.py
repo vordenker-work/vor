@@ -4,8 +4,10 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame,
 from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve, pyqtSignal, QSize, QRect, QParallelAnimationGroup
 from PyQt6.QtGui import QColor, QFont
 from ui_core.animated_nav_button import AnimatedNavButton
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableFrame
+from core.translation.translator import Translator
 
-class SidebarComponent(QFrame):
+class SidebarComponent(BaseTranslatableFrame):
     navigation_requested = pyqtSignal(int)
     
     def __init__(self, parent=None):
@@ -30,6 +32,7 @@ class SidebarComponent(QFrame):
         self._setup_nav()
         self.main_layout.addStretch()
         self._setup_footer()
+        self.retranslate_ui()
         
     def _setup_header(self):
         self.header_container = QWidget()
@@ -42,10 +45,10 @@ class SidebarComponent(QFrame):
         self.logo_label.setStyleSheet("font-size: 20px; color: #2563EB; font-weight: bold; border: none; background: transparent;")
         self.logo_label.mousePressEvent = lambda event: self.toggle_collapse()
         
-        self.title_label = QLabel("AI-Career Bridge")
+        self.title_label = make_translatable(QLabel(), "sidebar.title")
         self.title_label.setStyleSheet("font-size: 15px; font-weight: 800; color: #0F172A; border: none; background: transparent; letter-spacing: -0.4px;")
         
-        self.btn_collapse = QPushButton("☰")
+        self.btn_collapse = make_translatable(QPushButton(), "nav.str")
         self.btn_collapse.setFixedSize(28, 28)
         self.btn_collapse.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_collapse.setStyleSheet("""
@@ -81,27 +84,28 @@ class SidebarComponent(QFrame):
         self.button_group.setExclusive(True)
         
         nav_items = [
-            ("⌂", "Dashboard", 0),
-            ("🗺", "Academic Roadmap", 4),
-            ("🗓", "Study Tasks", 2),
-            ("💻", "Code & Algorithm Lab", 3),
-            ("🎙", "Mock Interviews", 5),
-            ("🏢", "Recruitment", 6),
-            ("💼", "Project Portfolio", 7),
-            ("📄", "CV Builder", 9),
-            ("💬", "Community Chat", 10),
-            ("🌳", "AI Skill Tree", 12),
-            ("⚙", "Settings", 8),
+            ("⌂", "Dashboard", 0, "nav.dashboard"),
+            ("🗺", "Academic Roadmap", 4, "nav.roadmap"),
+            ("🗓", "Study Tasks", 2, "nav.study_tasks"),
+            ("💻", "Code & Algorithm Lab", 3, "nav.code_lab"),
+            ("🎙", "Mock Interviews", 5, "nav.mock_interviews"),
+            ("🏢", "Recruitment", 6, "nav.recruitment"),
+            ("💼", "Project Portfolio", 7, "nav.project_portfolio"),
+            ("📄", "CV Builder", 9, "nav.cv_builder"),
+            ("💬", "Community Chat", 10, "nav.community_chat"),
+            ("🌳", "AI Skill Tree", 12, "nav.skill_tree"),
+            ("⚙", "Settings", 8, "nav.settings"),
         ]
         
         self.nav_buttons = []
-        for icon, label, idx in nav_items:
+        for icon, label, idx, key in nav_items:
             if idx == 8:
                 divider = QFrame()
                 divider.setFrameShape(QFrame.Shape.HLine)
                 divider.setStyleSheet("background-color: #E2E8F0; max-height: 1px; margin: 4px 10px; border: none;")
                 self.nav_layout.addWidget(divider)
             btn = AnimatedNavButton(icon, label)
+            btn.translation_key = key
             btn.clicked.connect(lambda ch, i=idx: self.navigation_requested.emit(i))
             self.button_group.addButton(btn, idx)
             self.nav_layout.addWidget(btn)
@@ -130,7 +134,7 @@ class SidebarComponent(QFrame):
         self.footer_layout.setContentsMargins(8, 8, 8, 8)
         self.footer_layout.setSpacing(12)
         
-        self.avatar_label = QLabel("ST")
+        self.avatar_label = make_translatable(QLabel(), "nav.st")
         self.avatar_label.setFixedSize(40, 40)
         self.avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.avatar_label.setStyleSheet("""
@@ -146,10 +150,10 @@ class SidebarComponent(QFrame):
         self.user_info_layout.setContentsMargins(0, 0, 0, 0)
         self.user_info_layout.setSpacing(2)
         
-        self.user_name_label = QLabel("Student")
+        self.user_name_label = make_translatable(QLabel(), "prof.default_name")
         self.user_name_label.setStyleSheet("font-size: 14px; font-weight: 700; color: #0F172A; border: none; background: transparent;")
         
-        self.user_role_label = QLabel("Undeclared Major")
+        self.user_role_label = make_translatable(QLabel(), "prof.default_major")
         self.user_role_label.setStyleSheet("font-size: 12px; color: #64748B; border: none; background: transparent; font-weight: 500;")
         
         self.user_info_layout.addWidget(self.user_name_label)
@@ -225,3 +229,19 @@ class SidebarComponent(QFrame):
         if not initials:
             initials = "ST"
         self.avatar_label.setText(initials)
+
+    def retranslate_ui(self):
+        self.title_label.setText(Translator.translate("sidebar.title", "AI-Career Bridge"))
+        for btn in self.nav_buttons:
+            if hasattr(btn, "translation_key"):
+                translated_text = Translator.translate(btn.translation_key)
+                btn.text_label.setText(translated_text)
+                btn.label_text = translated_text
+                
+        # Update default user name and role if none are set
+        current_name = self.user_name_label.text()
+        current_major = self.user_role_label.text()
+        if current_name in ["Student", "Sinh viên", "Guest"]:
+            self.user_name_label.setText(Translator.translate("sidebar.user.default_name", "Student"))
+        if current_major in ["Undeclared Major", "Chưa chọn ngành", "Undeclared"]:
+            self.user_role_label.setText(Translator.translate("sidebar.user.default_major", "Undeclared Major"))

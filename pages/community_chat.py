@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
     QPushButton, QScrollArea, QFrame, QGraphicsDropShadowEffect,
@@ -37,7 +39,7 @@ _SCROLLBAR_QSS = """
 # ==========================================
 # COMPONENT: LEFT SIDEBAR (Channels)
 # ==========================================
-class ChatLeftSidebar(QWidget):
+class ChatLeftSidebar(BaseTranslatableWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setStyleSheet("background: transparent; border: none;")
@@ -69,7 +71,7 @@ class ChatLeftSidebar(QWidget):
         # Logo row
         logo_row = QHBoxLayout()
         logo_row.setSpacing(12)
-        logo_icon = QLabel("V")
+        logo_icon = make_translatable(QLabel(), "ui.v")
         logo_icon.setFixedSize(38, 38)
         logo_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         logo_icon.setStyleSheet("""
@@ -78,9 +80,9 @@ class ChatLeftSidebar(QWidget):
         """)
         logo_text = QVBoxLayout()
         logo_text.setSpacing(1)
-        lt1 = QLabel("Vor Community")
+        lt1 = make_translatable(QLabel(), "ui.vor_community")
         lt1.setStyleSheet("font-size: 15px; font-weight: 800; color: #0F172A; border: none;")
-        lt2 = QLabel("AI Hub")
+        lt2 = make_translatable(QLabel(), "ui.ai_hub")
         lt2.setStyleSheet("font-size: 12px; font-weight: 600; color: #94A3B8; border: none;")
         logo_text.addWidget(lt1)
         logo_text.addWidget(lt2)
@@ -90,7 +92,7 @@ class ChatLeftSidebar(QWidget):
         hc_layout.addLayout(logo_row)
 
         # Channels title
-        ch_title = QLabel("CHANNELS")
+        ch_title = make_translatable(QLabel(), "ui.channels")
         ch_title.setStyleSheet("font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1.2px; border: none; padding-left: 4px;")
         hc_layout.addWidget(ch_title)
 
@@ -134,7 +136,7 @@ class ChatLeftSidebar(QWidget):
 # ==========================================
 # COMPONENT: CHAT MESSAGE BUBBLE
 # ==========================================
-class ChatMessageBubble(QWidget):
+class ChatMessageBubble(BaseTranslatableWidget):
     def __init__(self, text, sender, is_user=False, timestamp="10:00 AM"):
         super().__init__()
         self.setStyleSheet("background: transparent; border: none;")
@@ -242,7 +244,7 @@ class ChatMessageBubble(QWidget):
 # ==========================================
 # COMPONENT: MAIN CHAT AREA
 # ==========================================
-class MainChatArea(QWidget):
+class MainChatArea(BaseTranslatableWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setStyleSheet("background: transparent; border: none;")
@@ -263,9 +265,9 @@ class MainChatArea(QWidget):
         hl = QHBoxLayout(header)
         hl.setContentsMargins(26, 18, 26, 18)
 
-        self.title_lbl = QLabel("# general")
+        self.title_lbl = make_translatable(QLabel(), "ui.general")
         self.title_lbl.setStyleSheet("font-size: 18px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px; border: none;")
-        self.status_lbl = QLabel("1,204 members · 42 online")
+        self.status_lbl = make_translatable(QLabel(), "ui.1204_members_42")
         self.status_lbl.setStyleSheet("font-size: 13px; font-weight: 600; color: #94A3B8; border: none;")
 
         title_col = QVBoxLayout()
@@ -321,13 +323,13 @@ class MainChatArea(QWidget):
         ic_layout.setContentsMargins(20, 10, 10, 10)
         ic_layout.setSpacing(12)
 
-        btn_attach = QPushButton("📎")
+        btn_attach = make_translatable(QPushButton(), "ui.str")
         btn_attach.setFixedSize(34, 34)
         btn_attach.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_attach.setStyleSheet("background: transparent; font-size: 17px; border: none; color: #94A3B8;")
 
         self.msg_input = QLineEdit()
-        self.msg_input.setPlaceholderText("Message #general...")
+        self.msg_input.setPlaceholderText(Translator.translate("placeholder.message_general")); self.msg_input.placeholder_translation_key = "placeholder.message_general"
         self.msg_input.setStyleSheet("""
             QLineEdit {
                 background: transparent;
@@ -341,7 +343,7 @@ class MainChatArea(QWidget):
             }
         """)
 
-        self.btn_send = QPushButton("↑")
+        self.btn_send = make_translatable(QPushButton(), "ui.str_1")
         self.btn_send.setFixedSize(42, 42)
         self.btn_send.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_send.setStyleSheet("""
@@ -385,7 +387,7 @@ class MainChatArea(QWidget):
 # ==========================================
 # COMPONENT: RIGHT PANEL (Members)
 # ==========================================
-class ChatRightPanel(QWidget):
+class ChatRightPanel(BaseTranslatableWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setStyleSheet("background: transparent; border: none;")
@@ -408,7 +410,7 @@ class ChatRightPanel(QWidget):
         cl.setSpacing(20)
         cl.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        title = QLabel("MEMBERS")
+        title = make_translatable(QLabel(), "ui.members")
         title.setStyleSheet("font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1.2px; border: none;")
         cl.addWidget(title)
 
@@ -452,7 +454,7 @@ class ChatRightPanel(QWidget):
 # ==========================================
 # MAIN PAGE: COMMUNITY CHAT
 # ==========================================
-class CommunityChatPage(QWidget):
+class CommunityChatPage(BaseTranslatableWidget):
     def __init__(self, controller=None):
         super().__init__(parent=None)
         self.controller = controller

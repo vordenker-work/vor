@@ -113,14 +113,14 @@ def get_student_grades(student_id):
     conn.close()
     return [dict(g) for g in grades]
 
-def add_student_grade(student_id, semester, course_name, credits, grade_value, grade_letter):
-    """Adds a new grade entry for the student."""
+def add_student_grade(student_id, semester, course_name, credits, grade_value, grade_letter, attempt=1, grade_cc=None, grade_bt=None, grade_gk=None, grade_ck=None, grade_t10=None):
+    """Adds a new grade entry with detailed components for the student."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO student_grades (student_id, semester, course_name, credits, grade_value, grade_letter)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (student_id, semester, course_name, credits, grade_value, grade_letter))
+        INSERT INTO student_grades (student_id, semester, course_name, credits, grade_value, grade_letter, attempt, grade_cc, grade_bt, grade_gk, grade_ck, grade_t10)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (student_id, semester, course_name, credits, grade_value, grade_letter, attempt, grade_cc, grade_bt, grade_gk, grade_ck, grade_t10))
     new_id = cursor.lastrowid
     conn.commit()
     conn.close()

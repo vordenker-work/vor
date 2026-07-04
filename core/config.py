@@ -86,33 +86,37 @@ def get_global_stylesheet():
     
     QScrollBar:vertical {{
         background: transparent;
-        width: 8px;
+        width: 4px;
         margin: 0px;
+        border: none;
     }}
     QScrollBar::handle:vertical {{
         background: #CBD5E1;
         min-height: 30px;
-        border-radius: 4px;
+        border-radius: 2px;
     }}
     QScrollBar::handle:vertical:hover {{
         background: #94A3B8;
     }}
-    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; border: none; }}
+    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: transparent; }}
     
     QScrollBar:horizontal {{
         background: transparent;
-        height: 8px;
+        height: 4px;
         margin: 0px;
+        border: none;
     }}
     QScrollBar::handle:horizontal {{
         background: #CBD5E1;
         min-width: 30px;
-        border-radius: 4px;
+        border-radius: 2px;
     }}
     QScrollBar::handle:horizontal:hover {{
         background: #94A3B8;
     }}
-    QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; }}
+    QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; border: none; }}
+    QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: transparent; }}
     """
 
 # --- BACKEND SERVER URL ---

@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 import sys
 import io
 import json
@@ -16,7 +18,7 @@ from PyQt6.QtGui import QColor, QFont, QGuiApplication
 from database import code_lab_db
 from pages.code_lab_challenge_dialog import AddChallengeDialog
 
-class ClickableCard(QFrame):
+class ClickableCard(BaseTranslatableFrame):
     def __init__(self, challenge_data, on_click=None, parent=None):
         super().__init__(parent)
         self.challenge_data = challenge_data
@@ -53,7 +55,7 @@ class ClickableCard(QFrame):
             self.on_click(self.challenge_data)
         super().mousePressEvent(event)
 
-class CodeLabPage(QWidget):
+class CodeLabPage(BaseTranslatableWidget):
     def __init__(self, parent=None, controller=None):
         super().__init__(parent)
         self.controller = controller
@@ -79,11 +81,11 @@ class CodeLabPage(QWidget):
         header_layout.setContentsMargins(20, 0, 20, 0)
         header_layout.setSpacing(16)
         
-        title_lbl = QLabel("💻 Code & Algorithm Lab")
+        title_lbl = make_translatable(QLabel(), "nav.code_lab")
         title_lbl.setStyleSheet("font-size: 20px; font-weight: 900; color: #0F172A; border: none; background: transparent;")
         header_layout.addWidget(title_lbl)
         
-        sub_lbl = QLabel("Practice algorithms with instant local tests and AI mentor analysis")
+        sub_lbl = make_translatable(QLabel(), "ui.practice_algorithms_with")
         sub_lbl.setStyleSheet("font-size: 13px; color: #64748B; font-weight: 600; border: none; background: transparent;")
         header_layout.addWidget(sub_lbl)
         
@@ -118,12 +120,12 @@ class CodeLabPage(QWidget):
         
         toggle_lay.addWidget(QLabel("Mode:", styleSheet="font-weight: bold; color: #0F172A; border: none; background: transparent;"))
         
-        self.btn_mode_practice = QPushButton("Practice")
+        self.btn_mode_practice = make_translatable(QPushButton(), "ui.practice")
         self.btn_mode_practice.setCheckable(True)
         self.btn_mode_practice.setChecked(True)
         self.btn_mode_practice.setCursor(Qt.CursorShape.PointingHandCursor)
         
-        self.btn_mode_exam = QPushButton("Exam (Contest)")
+        self.btn_mode_exam = make_translatable(QPushButton(), "ui.exam_contest")
         self.btn_mode_exam.setCheckable(True)
         self.btn_mode_exam.setCursor(Qt.CursorShape.PointingHandCursor)
         
@@ -175,7 +177,7 @@ class CodeLabPage(QWidget):
         pc_lay.setContentsMargins(15, 12, 15, 12)
         pc_lay.setSpacing(8)
         
-        self.progress_lbl = QLabel("Challenges Solved: 0 / 0")
+        self.progress_lbl = make_translatable(QLabel(), "ui.challenges_solved_0")
         self.progress_lbl.setStyleSheet("color: #0F172A; font-size: 13px; font-weight: bold; background: transparent; border: none;")
         pc_lay.addWidget(self.progress_lbl)
         
@@ -198,7 +200,7 @@ class CodeLabPage(QWidget):
         
         # Filters Row
         self.search_box = QLineEdit()
-        self.search_box.setPlaceholderText("🔍 Search challenges...")
+        self.search_box.setPlaceholderText(Translator.translate("placeholder.search_challenges")); self.search_box.placeholder_translation_key = "placeholder.search_challenges"
         self.search_box.setStyleSheet("""
             QLineEdit {
                 background-color: #FFFFFF;
@@ -237,7 +239,7 @@ class CodeLabPage(QWidget):
         self.diff_combo.currentTextChanged.connect(self._apply_filters)
         left_lay.addWidget(self.diff_combo)
         
-        self.btn_add_challenge = QPushButton("➕ Add Challenge")
+        self.btn_add_challenge = make_translatable(QPushButton(), "ui.add_challenge")
         self.btn_add_challenge.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_add_challenge.setStyleSheet("""
             QPushButton {
@@ -291,11 +293,11 @@ class CodeLabPage(QWidget):
         code_icon.setStyleSheet("font-size: 64px; background: transparent; border: none;")
         wc_lay.addWidget(code_icon)
         
-        wc_title = QLabel("AI Code & Algorithm Playground")
+        wc_title = make_translatable(QLabel(), "ui.ai_code_algorithm")
         wc_title.setStyleSheet("color: #0F172A; font-size: 20px; font-weight: 800; background: transparent; border: none;")
         wc_lay.addWidget(wc_title)
         
-        wc_desc = QLabel("Select an algorithmic challenge from the left panel to open the interactive coding workspace, write your solution, run test cases, and obtain instant AI complexity analysis and optimization feedback.")
+        wc_desc = make_translatable(QLabel(), "ui.select_an_algorithmic")
         wc_desc.setStyleSheet("color: #94A3B8; font-size: 13px; line-height: 1.5; background: transparent; border: none;")
         wc_desc.setWordWrap(True)
         wc_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -329,14 +331,14 @@ class CodeLabPage(QWidget):
         dl.setContentsMargins(0, 0, 6, 0)
         dl.setSpacing(8)
         
-        self.problem_title = QLabel("Problem Title")
+        self.problem_title = make_translatable(QLabel(), "ui.problem_title")
         self.problem_title.setStyleSheet("color: #0F172A; font-size: 18px; font-weight: 800;")
         dl.addWidget(self.problem_title)
         
         meta_row = QHBoxLayout()
-        self.diff_badge = QLabel("Easy")
+        self.diff_badge = make_translatable(QLabel(), "ui.easy")
         self.diff_badge.setStyleSheet("color: #10B981; background-color: rgba(16, 185, 129, 0.15); font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px;")
-        self.topic_badge = QLabel("Topic: Array")
+        self.topic_badge = make_translatable(QLabel(), "ui.topic_array")
         self.topic_badge.setStyleSheet("color: #2563EB; font-size: 11px; font-weight: bold;")
         meta_row.addWidget(self.diff_badge)
         meta_row.addWidget(self.topic_badge)
@@ -390,7 +392,7 @@ class CodeLabPage(QWidget):
         
         self.console = QTextBrowser()
         self.console.setFont(QFont("Consolas", 10) if sys.platform == "win32" else QFont("Monaco", 10))
-        self.console.setText("Output logs will appear here after running tests...")
+        self.console.setText(Translator.translate("ui.output_logs_will")); self.console.translation_key = "ui.output_logs_will"
         self.console.setStyleSheet("""
             QTextBrowser {
                 background-color: #020617;
@@ -424,7 +426,7 @@ class CodeLabPage(QWidget):
         actions = QHBoxLayout()
         actions.setSpacing(12)
         
-        self.btn_run = QPushButton("⚡ Run Test Cases")
+        self.btn_run = make_translatable(QPushButton(), "ui.run_test_cases")
         self.btn_run.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_run.setStyleSheet("""
             QPushButton {
@@ -435,14 +437,14 @@ class CodeLabPage(QWidget):
         """)
         self.btn_run.clicked.connect(self._run_local_tests)
         
-        self.timer_lbl = QLabel("⏱️ 30:00")
+        self.timer_lbl = make_translatable(QLabel(), "ui.3000")
         self.timer_lbl.setStyleSheet("color: #0F172A; font-weight: bold; font-size: 14px; background: #FFFFFF; border-radius: 8px; padding: 0 15px;")
         self.timer_lbl.hide()
         actions.addWidget(self.timer_lbl)
         
         actions.addWidget(self.btn_run)
         
-        self.btn_ai = QPushButton("🧠 Ask AI Mentor")
+        self.btn_ai = make_translatable(QPushButton(), "ui.ask_ai_mentor")
         self.btn_ai.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_ai.setStyleSheet("""
             QPushButton {
@@ -454,7 +456,7 @@ class CodeLabPage(QWidget):
         self.btn_ai.clicked.connect(self._get_ai_mentor_review)
         actions.addWidget(self.btn_ai)
         
-        self.btn_submit = QPushButton("🚀 Submit Solution")
+        self.btn_submit = make_translatable(QPushButton(), "ui.submit_solution")
         self.btn_submit.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_submit.setStyleSheet("""
             QPushButton {
@@ -552,7 +554,7 @@ class CodeLabPage(QWidget):
                         dot_lbl.setText("●")
                         dot_style = "color: #F59E0B; font-size: 14px;"
                 else:
-                    dot_lbl.setText("○")
+                    dot_lbl.setText(Translator.translate("ui.label"))
                     
                 dot_lbl.setStyleSheet(dot_style + "background: transparent; border: none;")
                 header.addWidget(dot_lbl)
@@ -608,11 +610,11 @@ class CodeLabPage(QWidget):
                 self.console.setText(last_sub["ai_review"])
                 self.console.setStyleSheet("background-color: #020617; color: #E2E8F0; font-family: Consolas, monospace; font-size: 11px;")
             else:
-                self.console.setText("Write your code and run tests...")
+                self.console.setText(Translator.translate("ui.write_your_code")); self.console.translation_key = "ui.write_your_code"
                 self.console.setStyleSheet("background-color: #020617; color: #64748B; font-family: Consolas, monospace; font-size: 11px;")
         else:
             self.code_editor.setPlainText(challenge["starter_code"])
-            self.console.setText("Write your code and run tests...")
+            self.console.setText(Translator.translate("ui.write_your_code")); self.console.translation_key = "ui.write_your_code"
             self.console.setStyleSheet("background-color: #020617; color: #64748B; font-family: Consolas, monospace; font-size: 11px;")
             
         if is_exam:
@@ -633,7 +635,7 @@ class CodeLabPage(QWidget):
             self.timer_lbl.setText(f"⏱️ {mins:02d}:{secs:02d}")
         else:
             self.timer.stop()
-            self.timer_lbl.setText("⏱️ Timeout")
+            self.timer_lbl.setText(Translator.translate("ui.timeout")); self.timer_lbl.translation_key = "ui.timeout"
             self._show_message("Time's Up!", "Thời gian làm bài thi đã hết! Kết quả sẽ không được tính.", is_warning=True)
 
     def _run_local_tests(self, return_ratio=False):
@@ -643,7 +645,7 @@ class CodeLabPage(QWidget):
         code = self.code_editor.toPlainText()
         test_cases_json = self.active_challenge["test_cases"]
         
-        self.console.setText("Running local test suite...")
+        self.console.setText(Translator.translate("ui.running_local_test")); self.console.translation_key = "ui.running_local_test"
         self.console.setStyleSheet("background-color: #020617; color: #38BDF8; font-family: Consolas, monospace; font-size: 11px;")
         
         QGuiApplication.processEvents()
@@ -666,7 +668,7 @@ class CodeLabPage(QWidget):
                     
             if not func:
                 sys.stdout = old_stdout
-                self.console.setText("❌ Error: No function defined in code workspace.")
+                self.console.setText(Translator.translate("ui.error_no_function")); self.console.translation_key = "ui.error_no_function"
                 self.console.setStyleSheet("background-color: #020617; color: #EF4444; font-family: Consolas, monospace; font-size: 11px;")
                 return 0.0 if return_ratio else False
                 
@@ -740,7 +742,7 @@ class CodeLabPage(QWidget):
         # First, run local tests to check correctness
         passed = self._run_local_tests()
         
-        self.console.setText("Querying AI Coding Mentor review...\n(Testing local Ollama LLM endpoint, falling back to structural analysis if offline)")
+        self.console.setText(Translator.translate("ui.querying_ai_coding")); self.console.translation_key = "ui.querying_ai_coding"
         self.console.setStyleSheet("background-color: #020617; color: #A78BFA; font-family: Consolas, monospace; font-size: 11px;")
         QGuiApplication.processEvents()
         
@@ -962,7 +964,7 @@ class CodeLabPage(QWidget):
             score = int(passed_ratio * 100 * mult)
             
             self.timer.stop()
-            self.timer_lbl.setText("⏱️ Done")
+            self.timer_lbl.setText(Translator.translate("ui.done")); self.timer_lbl.translation_key = "ui.done"
             
             ai_feedback = self._analyze_code_structurally(cid, code, passed_ratio == 1.0)
             code_lab_db.save_submission(cid, code, "Solved" if passed_ratio == 1.0 else "Attempted", ai_feedback, score, mode='exam')

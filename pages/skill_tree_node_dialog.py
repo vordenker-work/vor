@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
     QPushButton, QSpinBox, QCheckBox, QComboBox, QMessageBox, QWidget, QScrollArea
@@ -5,7 +7,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from database import skill_tree_db
 
-class NodeDialog(QDialog):
+class NodeDialog(BaseTranslatableDialog):
     def __init__(self, node_data=None, current_branch_name=None, parent=None):
         super().__init__(parent)
         self.node_data = node_data
@@ -15,7 +17,7 @@ class NodeDialog(QDialog):
         if self.is_edit:
             self.setWindowTitle(f"Edit Skill: {node_data.get('name')}")
         else:
-            self.setWindowTitle("Add New Skill Node")
+            self.setWindowTitle(Translator.translate("title.add_new_skill"))
 
         self.resize(420, 520)
         self.setStyleSheet("""
@@ -86,7 +88,7 @@ class NodeDialog(QDialog):
         self.layout.setContentsMargins(20, 20, 20, 20)
 
         # 1. Branch Selection (Disabled in edit mode to preserve branch structure)
-        self.layout.addWidget(QLabel("Skill Branch:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.skill_branch"))
         self.branch_combo = QComboBox()
         self.layout.addWidget(self.branch_combo)
         
@@ -102,15 +104,15 @@ class NodeDialog(QDialog):
             self.branch_combo.setCurrentText(current_branch_name)
 
         # 2. Node Name
-        self.layout.addWidget(QLabel("Skill Name:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.skill_name"))
         self.name_input = QLineEdit()
-        self.name_input.setPlaceholderText("e.g. React.js, NumPy, PyTorch")
+        self.name_input.setPlaceholderText(Translator.translate("placeholder.eg_reactjs_numpy")); self.name_input.placeholder_translation_key = "placeholder.eg_reactjs_numpy"
         if self.is_edit:
             self.name_input.setText(node_data.get("name", ""))
         self.layout.addWidget(self.name_input)
 
         # 3. Prerequisite / Parent Skill Dropdown
-        self.layout.addWidget(QLabel("Prerequisite (Parent) Skill:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.prerequisite_parent_skill"))
         self.parent_combo = QComboBox()
         self.layout.addWidget(self.parent_combo)
         
@@ -119,7 +121,7 @@ class NodeDialog(QDialog):
         self._populate_parents()
 
         # 4. Mastery
-        self.layout.addWidget(QLabel("Mastery Level (0 - 100%):"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.mastery_level_0"))
         self.mastery_spin = QSpinBox()
         self.mastery_spin.setRange(0, 100)
         if self.is_edit:
@@ -129,7 +131,7 @@ class NodeDialog(QDialog):
         self.layout.addWidget(self.mastery_spin)
 
         # 5. Unlocked Checkbox
-        self.unlocked_checkbox = QCheckBox("Unlocked / Available")
+        self.unlocked_checkbox = make_translatable(QCheckBox(), "dialog.unlocked_available")
         if self.is_edit:
             self.unlocked_checkbox.setChecked(bool(node_data.get("unlocked", False)))
         else:
@@ -138,7 +140,7 @@ class NodeDialog(QDialog):
 
         # 5.5. Related Projects
         if self.is_edit:
-            self.layout.addWidget(QLabel("Related Portfolio Projects:"))
+            self.layout.addWidget(make_translatable(QLabel(), "dialog.related_portfolio_projects"))
             
             # Fetch from portfolio_db
             related_projects = []
@@ -177,29 +179,29 @@ class NodeDialog(QDialog):
                 proj_scroll.setWidgetResizable(True)
                 self.layout.addWidget(proj_scroll)
             else:
-                none_lbl = QLabel("No portfolio projects associated with this skill.")
+                none_lbl = make_translatable(QLabel(), "dialog.no_portfolio_projects")
                 none_lbl.setStyleSheet("color: #64748B; font-size: 12px; font-style: italic;")
                 self.layout.addWidget(none_lbl)
 
         # 6. Action buttons
         btn_box = QHBoxLayout()
         if self.is_edit:
-            self.btn_submit = QPushButton("Save Changes")
+            self.btn_submit = make_translatable(QPushButton(), "dialog.save_changes")
             self.btn_submit.setObjectName("btnPrimary")
             self.btn_submit.clicked.connect(self._submit)
             
-            self.btn_delete = QPushButton("Delete Skill")
+            self.btn_delete = make_translatable(QPushButton(), "dialog.delete_skill")
             self.btn_delete.setObjectName("btnDelete")
             self.btn_delete.clicked.connect(self._delete)
             
             btn_box.addWidget(self.btn_submit)
             btn_box.addWidget(self.btn_delete)
         else:
-            self.btn_submit = QPushButton("Add Skill")
+            self.btn_submit = make_translatable(QPushButton(), "dialog.add_skill")
             self.btn_submit.setObjectName("btnPrimary")
             self.btn_submit.clicked.connect(self._submit)
             
-            self.btn_cancel = QPushButton("Cancel")
+            self.btn_cancel = make_translatable(QPushButton(), "button.cancel")
             self.btn_cancel.clicked.connect(self.reject)
             
             btn_box.addWidget(self.btn_submit)
@@ -238,7 +240,7 @@ class NodeDialog(QDialog):
     def _submit(self):
         name = self.name_input.text().strip()
         if not name:
-            QMessageBox.warning(self, "Validation Error", "Skill Name cannot be empty.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.skill_name_cannot"))
             return
 
         branch_name = self.branch_combo.currentText()

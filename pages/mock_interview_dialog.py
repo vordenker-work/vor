@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 import json
 import urllib.request
 import datetime
@@ -33,7 +35,7 @@ QUESTION_BANK = {
     ]
 }
 
-class MockInterviewDialog(QDialog):
+class MockInterviewDialog(BaseTranslatableDialog):
     def __init__(self, category, student_id, parent=None):
         super().__init__(parent)
         self.category = category
@@ -129,7 +131,7 @@ class MockInterviewDialog(QDialog):
         lay.setSpacing(16)
         lay.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        icon = QLabel("🎙️")
+        icon = make_translatable(QLabel(), "dialog.str")
         icon.setStyleSheet("font-size: 48px;")
         icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lay.addWidget(icon)
@@ -156,17 +158,17 @@ class MockInterviewDialog(QDialog):
         lay = QVBoxLayout(self.page_qa)
         lay.setSpacing(16)
         
-        self.lbl_progress = QLabel("Câu hỏi 1 / 3")
+        self.lbl_progress = make_translatable(QLabel(), "dialog.cau_hoi_1")
         self.lbl_progress.setStyleSheet("color: #2563EB; font-weight: bold; font-size: 12px; text-transform: uppercase;")
         lay.addWidget(self.lbl_progress)
         
-        self.lbl_question = QLabel("Question text goes here...")
+        self.lbl_question = make_translatable(QLabel(), "dialog.question_text_goes")
         self.lbl_question.setWordWrap(True)
         self.lbl_question.setStyleSheet("font-size: 15px; font-weight: bold; line-height: 1.5; color: #0F172A;")
         lay.addWidget(self.lbl_question)
         
         self.answer_input = QTextEdit()
-        self.answer_input.setPlaceholderText("Nhập câu trả lời của bạn tại đây (Khuyên dùng viết trên 50 từ)...")
+        self.answer_input.setPlaceholderText(Translator.translate("placeholder.nhp_cu_tr")); self.answer_input.placeholder_translation_key = "placeholder.nhp_cu_tr"
         lay.addWidget(self.answer_input)
         
         btn_lay = QHBoxLayout()
@@ -184,17 +186,17 @@ class MockInterviewDialog(QDialog):
         lay.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lay.setSpacing(16)
         
-        self.loading_icon = QLabel("⚙️")
+        self.loading_icon = make_translatable(QLabel(), "dialog.str_1")
         self.loading_icon.setStyleSheet("font-size: 48px; color: #2563EB;")
         self.loading_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lay.addWidget(self.loading_icon)
         
-        loading_text = QLabel("AI đang chấm điểm và phân tích câu trả lời của bạn...")
+        loading_text = make_translatable(QLabel(), "dialog.ai_dang_cham")
         loading_text.setStyleSheet("font-size: 14px; font-weight: bold;")
         loading_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lay.addWidget(loading_text)
         
-        loading_sub = QLabel("Quá trình này có thể mất vài giây...")
+        loading_sub = make_translatable(QLabel(), "dialog.qua_trinh_nay")
         loading_sub.setStyleSheet("color: #64748B; font-size: 12px;")
         loading_sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lay.addWidget(loading_sub)
@@ -207,7 +209,7 @@ class MockInterviewDialog(QDialog):
         hdr.addWidget(QLabel("Kết quả đánh giá phỏng vấn", styleSheet="font-size: 16px; font-weight: bold; color: #0F172A;"))
         hdr.addStretch()
         
-        self.lbl_score = QLabel("8.5 / 10")
+        self.lbl_score = make_translatable(QLabel(), "dialog.85_10")
         self.lbl_score.setStyleSheet("font-size: 14px; font-weight: 800; color: #10B981; background: #E6F4EA; padding: 4px 10px; border-radius: 6px;")
         hdr.addWidget(self.lbl_score)
         lay.addLayout(hdr)
@@ -237,7 +239,7 @@ class MockInterviewDialog(QDialog):
     def _submit_answer(self):
         ans = self.answer_input.toPlainText().strip()
         if not ans:
-            QMessageBox.warning(self, "Lỗi xác thực", "Vui lòng nhập câu trả lời của bạn.")
+            QMessageBox.warning(self, Translator.translate("msg.title.loi_xac_thuc"), Translator.translate("msg.text.vui_long_nhap"))
             return
             
         self.answers.append(ans)

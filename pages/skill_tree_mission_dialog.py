@@ -1,3 +1,4 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QCheckBox, QFrame, QMessageBox, QScrollArea, QWidget
@@ -6,7 +7,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from database import skill_tree_db
 
-class MissionDialog(QDialog):
+class MissionDialog(BaseTranslatableDialog):
     def __init__(self, node_data, controller=None, parent=None):
         super().__init__(parent)
         self.node_data = node_data
@@ -146,7 +147,7 @@ class MissionDialog(QDialog):
         layout.addWidget(scroll, 1)
 
         # Deep Links Section Title
-        lbl_links = QLabel("CORE HUBS DEEP LINKS")
+        lbl_links = make_translatable(QLabel(), "dialog.core_hubs_deep")
         lbl_links.setStyleSheet("font-size: 11px; font-weight: 800; color: #475569; letter-spacing: 1.5px;")
         layout.addWidget(lbl_links)
 
@@ -172,7 +173,7 @@ class MissionDialog(QDialog):
         layout.addLayout(links_layout)
 
         # Bottom Close button
-        btn_close = QPushButton("Close")
+        btn_close = make_translatable(QPushButton(), "button.close")
         btn_close.clicked.connect(self.accept)
         layout.addWidget(btn_close)
 

@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 import math
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
@@ -178,7 +180,7 @@ class SkillTreeCanvas(QGraphicsView):
 # ==========================================
 # COMPONENT: Right Detail Panel
 # ==========================================
-class SkillDetailPanel(QFrame):
+class SkillDetailPanel(BaseTranslatableFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent_page = parent
@@ -204,20 +206,20 @@ class SkillDetailPanel(QFrame):
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         # Node icon placeholder
-        self.node_icon = QLabel("⬡")
+        self.node_icon = make_translatable(QLabel(), "ui.label_2")
         self.node_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.node_icon.setStyleSheet("font-size: 56px; color: #38BDF8; border: none; background: transparent;")
         layout.addWidget(self.node_icon)
 
         # Title
-        self.title_lbl = QLabel("Select a Skill")
+        self.title_lbl = make_translatable(QLabel(), "ui.select_a_skill")
         self.title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.title_lbl.setWordWrap(True)
         self.title_lbl.setStyleSheet("font-size: 22px; font-weight: 900; color: #0F172A; border: none; background: transparent; letter-spacing: -0.5px;")
         layout.addWidget(self.title_lbl)
 
         # Status label
-        self.status_lbl = QLabel("Click a node to view details")
+        self.status_lbl = make_translatable(QLabel(), "ui.click_a_node")
         self.status_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.status_lbl.setStyleSheet("font-size: 13px; color: #64748B; border: none; background: transparent; font-weight: 600;")
         layout.addWidget(self.status_lbl)
@@ -225,7 +227,7 @@ class SkillDetailPanel(QFrame):
         layout.addSpacing(5)
 
         # Progress section
-        prog_title = QLabel("MASTERY")
+        prog_title = make_translatable(QLabel(), "ui.mastery")
         prog_title.setStyleSheet("font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1px; border: none; background: transparent;")
         layout.addWidget(prog_title)
 
@@ -254,7 +256,7 @@ class SkillDetailPanel(QFrame):
         layout.addSpacing(5)
 
         # CTA Button
-        self.btn_learn = QPushButton("⚡ Start Mission")
+        self.btn_learn = make_translatable(QPushButton(), "ui.start_mission")
         self.btn_learn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_learn.setStyleSheet("""
             QPushButton {
@@ -275,7 +277,7 @@ class SkillDetailPanel(QFrame):
         layout.addWidget(self.btn_learn)
 
         # Edit Skill Button
-        self.btn_edit_skill = QPushButton("✏️ Edit Skill Details")
+        self.btn_edit_skill = make_translatable(QPushButton(), "ui.edit_skill_details")
         self.btn_edit_skill.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_edit_skill.setStyleSheet("""
             QPushButton {
@@ -308,7 +310,7 @@ class SkillDetailPanel(QFrame):
 
         if unlocked:
             self.node_icon.setStyleSheet("font-size: 56px; color: #38BDF8; border: none; background: transparent;")
-            self.node_icon.setText("◈")
+            self.node_icon.setText(Translator.translate("ui.label_1")); self.node_icon.translation_key = "ui.label_1"
             self.status_lbl.setText(f"{'Mastered' if mastery >= 80 else 'In Progress' if mastery > 0 else 'Not Started'}")
             self.status_lbl.setStyleSheet("font-size: 13px; color: #38BDF8; border: none; background: transparent; font-weight: 700;")
             self.progress_bar.setValue(mastery)
@@ -328,11 +330,11 @@ class SkillDetailPanel(QFrame):
         else:
             self.node_icon.setStyleSheet("font-size: 56px; color: #CBD5E1; border: none; background: transparent;")
             self.node_icon.setText("🔒")
-            self.status_lbl.setText("Locked — Complete prerequisites")
+            self.status_lbl.setText(Translator.translate("ui.locked_complete_prerequisites")); self.status_lbl.translation_key = "ui.locked_complete_prerequisites"
             self.status_lbl.setStyleSheet("font-size: 13px; color: #94A3B8; border: none; background: transparent; font-weight: 600;")
             self.progress_bar.setValue(0)
             self.progress_lbl.setText("0%")
-            self.btn_learn.setText("🔒 Locked")
+            self.btn_learn.setText(Translator.translate("ui.locked")); self.btn_learn.translation_key = "ui.locked"
             self.btn_learn.setEnabled(False)
             self.btn_learn.setStyleSheet("""
                 QPushButton {
@@ -354,7 +356,7 @@ class SkillDetailPanel(QFrame):
 # ==========================================
 # MAIN PAGE: AI SKILL TREE
 # ==========================================
-class SkillTreePage(QWidget):
+class SkillTreePage(BaseTranslatableWidget):
     def __init__(self, controller=None):
         super().__init__()
         self.controller = controller
@@ -381,10 +383,10 @@ class SkillTreePage(QWidget):
         title_v = QVBoxLayout()
         title_v.setSpacing(4)
         
-        page_title = QLabel("AI Skill Tree")
+        page_title = make_translatable(QLabel(), "ui.ai_skill_tree")
         page_title.setStyleSheet("font-size: 28px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px; border: none; background: transparent;")
 
-        page_sub = QLabel("Navigate your learning journey")
+        page_sub = make_translatable(QLabel(), "ui.navigate_your_learning")
         page_sub.setStyleSheet("font-size: 14px; color: #64748B; font-weight: 600; border: none; background: transparent;")
 
         title_v.addWidget(page_title)
@@ -409,19 +411,19 @@ class SkillTreePage(QWidget):
             }
         """
         
-        self.btn_manage_branches = QPushButton("📁 Branches")
+        self.btn_manage_branches = make_translatable(QPushButton(), "ui.branches")
         self.btn_manage_branches.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_manage_branches.setStyleSheet(btn_style)
         self.btn_manage_branches.clicked.connect(self._on_manage_branches)
         h_layout.addWidget(self.btn_manage_branches)
 
-        self.btn_add_node = QPushButton("➕ Add Skill")
+        self.btn_add_node = make_translatable(QPushButton(), "ui.add_skill")
         self.btn_add_node.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_add_node.setStyleSheet(btn_style)
         self.btn_add_node.clicked.connect(self._on_add_node)
         h_layout.addWidget(self.btn_add_node)
 
-        self.btn_manage_paths = QPushButton("🔗 Connect Paths")
+        self.btn_manage_paths = make_translatable(QPushButton(), "ui.connect_paths")
         self.btn_manage_paths.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_manage_paths.setStyleSheet(btn_style)
         self.btn_manage_paths.clicked.connect(self._on_manage_paths)
@@ -506,12 +508,12 @@ class SkillTreePage(QWidget):
         
         # Reset detail panel
         self.detail_panel.selected_node_data = None
-        self.detail_panel.title_lbl.setText("Select a Skill")
-        self.detail_panel.status_lbl.setText("Click a node to view details")
+        self.detail_panel.title_lbl.setText(Translator.translate("ui.select_a_skill")); self.detail_panel.title_lbl.translation_key = "ui.select_a_skill"
+        self.detail_panel.status_lbl.setText(Translator.translate("ui.click_a_node")); self.detail_panel.status_lbl.translation_key = "ui.click_a_node"
         self.detail_panel.progress_bar.setValue(0)
         self.detail_panel.progress_lbl.setText("0%")
         self.detail_panel.node_icon.setStyleSheet("font-size: 56px; color: #38BDF8; border: none; background: transparent;")
-        self.detail_panel.node_icon.setText("⬡")
-        self.detail_panel.btn_learn.setText("⚡ Start Mission")
+        self.detail_panel.node_icon.setText(Translator.translate("ui.label_2")); self.detail_panel.node_icon.translation_key = "ui.label_2"
+        self.detail_panel.btn_learn.setText(Translator.translate("ui.start_mission")); self.detail_panel.btn_learn.translation_key = "ui.start_mission"
         self.detail_panel.btn_learn.setEnabled(True)
         self.detail_panel.btn_edit_skill.hide()

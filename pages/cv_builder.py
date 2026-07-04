@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 import base64
 import json
 import requests
@@ -11,7 +13,7 @@ from PyQt6.QtGui import QColor, QFont, QLinearGradient, QPalette, QPixmap, QPain
 from modules.local_storage import local_data
 from core.config import SERVER_URL
 
-class CVBuilderPage(QWidget):
+class CVBuilderPage(BaseTranslatableWidget):
     def __init__(self, controller=None):
         super().__init__()
         self.controller = controller
@@ -48,7 +50,7 @@ class CVBuilderPage(QWidget):
         left_layout.setContentsMargins(30, 30, 30, 30)
         left_layout.setSpacing(24)
         
-        title_lbl = QLabel("Tạo CV AI Cao Cấp")
+        title_lbl = make_translatable(QLabel(), "ui.tao_cv_ai")
         title_lbl.setStyleSheet("font-size: 24px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px; border: none; background: transparent;")
         left_layout.addWidget(title_lbl)
         
@@ -129,9 +131,9 @@ class CVBuilderPage(QWidget):
         # Personal Photo
         add_section("Ảnh Đại Diện")
         photo_row = QHBoxLayout()
-        self.lbl_avatar_preview = QLabel("Chưa chọn ảnh")
+        self.lbl_avatar_preview = make_translatable(QLabel(), "ui.chua_chon_anh")
         self.lbl_avatar_preview.setStyleSheet("color: #64748B; font-size: 12px; font-weight: bold;")
-        self.btn_avatar = QPushButton("Tải ảnh")
+        self.btn_avatar = make_translatable(QPushButton(), "ui.ti_nh")
         self.btn_avatar.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_avatar.setStyleSheet("""
             QPushButton {
@@ -169,15 +171,15 @@ class CVBuilderPage(QWidget):
         cert_form.setSpacing(6)
         
         self.edit_cert_name = QLineEdit()
-        self.edit_cert_name.setPlaceholderText("Tên chứng chỉ (ví dụ: IELTS 8.0)...")
+        self.edit_cert_name.setPlaceholderText(Translator.translate("placeholder.tn_chng_ch")); self.edit_cert_name.placeholder_translation_key = "placeholder.tn_chng_ch"
         self.edit_cert_name.setStyleSheet("QLineEdit { background: #F1F5F9; border-radius: 8px; padding: 8px; font-size: 12px; }")
         
         cert_row2 = QHBoxLayout()
         self.edit_cert_year = QLineEdit()
-        self.edit_cert_year.setPlaceholderText("Năm (ví dụ: 2024)")
+        self.edit_cert_year.setPlaceholderText(Translator.translate("placeholder.nm_v_d")); self.edit_cert_year.placeholder_translation_key = "placeholder.nm_v_d"
         self.edit_cert_year.setStyleSheet("QLineEdit { background: #F1F5F9; border-radius: 8px; padding: 8px; font-size: 12px; }")
         
-        self.btn_cert_img = QPushButton("Tải ảnh")
+        self.btn_cert_img = make_translatable(QPushButton(), "ui.ti_nh")
         self.btn_cert_img.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_cert_img.setStyleSheet("""
             QPushButton {
@@ -191,7 +193,7 @@ class CVBuilderPage(QWidget):
         cert_row2.addWidget(self.edit_cert_year, 2)
         cert_row2.addWidget(self.btn_cert_img, 1)
         
-        self.btn_add_cert = QPushButton("+ Thêm chứng chỉ")
+        self.btn_add_cert = make_translatable(QPushButton(), "ui.them_chung_chi")
         self.btn_add_cert.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_add_cert.setStyleSheet("""
             QPushButton {
@@ -216,12 +218,9 @@ class CVBuilderPage(QWidget):
         form_layout.addStretch()
         scroll_area.setWidget(scroll_content)
         left_layout.addWidget(scroll_area)
-
-        # Restore saved draft from local storage
-        self._restore_draft()
         
         # AI Auto-Generate Button
-        self.btn_ai_generate = QPushButton("✨ AI Auto-Generate")
+        self.btn_ai_generate = make_translatable(QPushButton(), "ui.ai_autogenerate")
         self.btn_ai_generate.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_ai_generate.setStyleSheet("""
             QPushButton {
@@ -246,7 +245,7 @@ class CVBuilderPage(QWidget):
         self.btn_ai_generate.setGraphicsEffect(btn_ai_shadow)
         
         # Export Button
-        self.btn_export = QPushButton("Export to PDF")
+        self.btn_export = make_translatable(QPushButton(), "ui.export_to_pdf")
         self.btn_export.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_export.setStyleSheet("""
             QPushButton {
@@ -266,7 +265,7 @@ class CVBuilderPage(QWidget):
         """)
 
         # Sync Button
-        self.btn_sync = QPushButton("Sync to Web Recruiter Portal")
+        self.btn_sync = make_translatable(QPushButton(), "ui.sync_to_web")
         self.btn_sync.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_sync.setStyleSheet("""
             QPushButton {
@@ -430,6 +429,7 @@ class CVBuilderPage(QWidget):
         
         from core.config import apply_theme
         apply_theme(self)
+        self._restore_draft()
         
     def _export_pdf(self):
         filepath, _ = QFileDialog.getSaveFileName(self, "Export PDF", "My_CV.pdf", "PDF Files (*.pdf)")
@@ -468,7 +468,7 @@ class CVBuilderPage(QWidget):
         filepath, _ = QFileDialog.getOpenFileName(self, "Chọn ảnh chứng chỉ", "", "Image Files (*.png *.jpg *.jpeg)")
         if filepath:
             self.temp_cert_image_path = filepath
-            self.btn_cert_img.setText("Đã chọn")
+            self.btn_cert_img.setText(Translator.translate("ui.chn")); self.btn_cert_img.translation_key = "ui.chn"
             
             with open(filepath, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
@@ -492,7 +492,7 @@ class CVBuilderPage(QWidget):
         
         self.edit_cert_name.clear()
         self.edit_cert_year.clear()
-        self.btn_cert_img.setText("Tải ảnh")
+        self.btn_cert_img.setText(Translator.translate("ui.ti_nh")); self.btn_cert_img.translation_key = "ui.ti_nh"
         self.temp_cert_image_path = None
         self.temp_cert_base64 = ""
         
@@ -543,7 +543,7 @@ class CVBuilderPage(QWidget):
             self.cv_avatar.setPixmap(QPixmap(self.avatar_path))
         else:
             self.cv_avatar.clear()
-            self.cv_avatar.setText("No Photo")
+            self.cv_avatar.setText(Translator.translate("ui.no_photo")); self.cv_avatar.translation_key = "ui.no_photo"
             self.cv_avatar.setStyleSheet("border-radius: 40px; background-color: #E2E8F0; border: 1px solid #CBD5E1; color: #64748B; font-size: 10px; font-weight: bold; qproperty-alignment: AlignCenter;")
 
         # Update certificates list in A4 preview
@@ -626,7 +626,7 @@ class CVBuilderPage(QWidget):
             "certificates": json.dumps(certs_list)
         }
         
-        self.btn_sync.setText("Syncing...")
+        self.btn_sync.setText(Translator.translate("ui.syncing")); self.btn_sync.translation_key = "ui.syncing"
         self.btn_sync.setEnabled(False)
         QCoreApplication.processEvents()
         
@@ -635,11 +635,11 @@ class CVBuilderPage(QWidget):
             r.raise_for_status()
             res = r.json()
             if res.get("success"):
-                QMessageBox.information(self, "Đồng bộ thành công", "CV của bạn đã được đồng bộ trực tiếp lên Web Recruiter Portal!")
+                QMessageBox.information(self, Translator.translate("msg.title.dong_bo_thanh"), Translator.translate("msg.text.cv_cua_ban"))
             else:
                 QMessageBox.warning(self, "Thất bại", f"Đồng bộ không thành công: {res.get('message')}")
         except Exception as e:
             QMessageBox.critical(self, "Lỗi kết nối", f"Không thể kết nối đến Web Recruiter Portal:\n{str(e)}\n\nVui lòng kiểm tra xem server web portal (port 8000) đã khởi động chưa.")
         finally:
-            self.btn_sync.setText("Sync to Web Recruiter Portal")
+            self.btn_sync.setText(Translator.translate("ui.sync_to_web")); self.btn_sync.translation_key = "ui.sync_to_web"
             self.btn_sync.setEnabled(True)

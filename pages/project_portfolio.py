@@ -1,3 +1,6 @@
+from core.translation.base_translatable_widget import make_translatable
+from core.translation.base_translatable_widget import BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
     QFrame, QScrollArea, QGraphicsDropShadowEffect, QGridLayout,
@@ -8,7 +11,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QFont, QGuiApplication
 from database import portfolio_db
 
-class ModernCard(QFrame):
+class ModernCard(BaseTranslatableFrame):
     def __init__(self, project_data, on_click=None, parent=None):
         super().__init__(parent)
         self.project_data = project_data
@@ -45,7 +48,7 @@ class ModernCard(QFrame):
             self.on_click(self.project_data)
         super().mousePressEvent(event)
 
-class StatsBox(QFrame):
+class StatsBox(BaseTranslatableFrame):
     def __init__(self, title, icon, value, color_accent, parent=None):
         super().__init__(parent)
         self.setStyleSheet("""
@@ -93,7 +96,7 @@ class StatsBox(QFrame):
     def set_value(self, val):
         self.val_lbl.setText(str(val))
 
-class ProjectPortfolioPage(QWidget):
+class ProjectPortfolioPage(BaseTranslatableWidget):
     def __init__(self, controller=None, parent=None):
         super().__init__(parent)
         self.controller = controller
@@ -135,17 +138,17 @@ class ProjectPortfolioPage(QWidget):
         header_layout.setContentsMargins(20, 0, 20, 0)
         header_layout.setSpacing(16)
         
-        title_lbl = QLabel("💼 Project Portfolio")
+        title_lbl = make_translatable(QLabel(), "nav.project_portfolio")
         title_lbl.setStyleSheet("font-size: 20px; font-weight: 900; color: #0F172A; border: none; background: transparent;")
         header_layout.addWidget(title_lbl)
         
-        sub_lbl = QLabel("Display and track your engineering work")
+        sub_lbl = make_translatable(QLabel(), "ui.display_and_track")
         sub_lbl.setStyleSheet("font-size: 13px; color: #64748B; font-weight: 600; border: none; background: transparent;")
         header_layout.addWidget(sub_lbl)
         
         header_layout.addStretch()
         
-        self.btn_add = QPushButton("+ Add Project")
+        self.btn_add = make_translatable(QPushButton(), "ui.add_project")
         self.btn_add.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_add.setStyleSheet("""
             QPushButton {
@@ -190,7 +193,7 @@ class ProjectPortfolioPage(QWidget):
         self.filter_layout.setSpacing(12)
         
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("🔍 Search projects by title, tech stack, description, or skills...")
+        self.search_input.setPlaceholderText(Translator.translate("placeholder.search_projects_by")); self.search_input.placeholder_translation_key = "placeholder.search_projects_by"
         self.search_input.setStyleSheet("""
             QLineEdit {
                 background-color: #FFFFFF;
@@ -277,7 +280,7 @@ class ProjectPortfolioPage(QWidget):
         header_row = QHBoxLayout()
         header_row.setSpacing(12)
         
-        self.btn_back = QPushButton("← Back to Projects")
+        self.btn_back = make_translatable(QPushButton(), "ui.back_to_projects")
         self.btn_back.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_back.setStyleSheet("""
             QPushButton {
@@ -289,7 +292,7 @@ class ProjectPortfolioPage(QWidget):
         header_row.addWidget(self.btn_back)
         header_row.addStretch()
         
-        self.btn_edit_p = QPushButton("⚙ Edit Project")
+        self.btn_edit_p = make_translatable(QPushButton(), "ui.edit_project")
         self.btn_edit_p.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_edit_p.setStyleSheet("""
             QPushButton {
@@ -301,7 +304,7 @@ class ProjectPortfolioPage(QWidget):
         self.btn_edit_p.clicked.connect(self._on_edit_project_inline)
         header_row.addWidget(self.btn_edit_p)
         
-        self.btn_delete_p = QPushButton("🗑 Delete")
+        self.btn_delete_p = make_translatable(QPushButton(), "ui.delete")
         self.btn_delete_p.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_delete_p.setStyleSheet("""
             QPushButton {
@@ -317,7 +320,7 @@ class ProjectPortfolioPage(QWidget):
         
         # Title & Tech Row
         title_row = QHBoxLayout()
-        self.lbl_detail_title = QLabel("Project Title")
+        self.lbl_detail_title = make_translatable(QLabel(), "ui.project_title")
         self.lbl_detail_title.setStyleSheet("font-size: 24px; font-weight: 900; color: #0F172A; background: transparent;")
         title_row.addWidget(self.lbl_detail_title)
         
@@ -350,12 +353,12 @@ class ProjectPortfolioPage(QWidget):
         dl = self.desc_card.internal_layout
         dl.setSpacing(8)
         dl.addWidget(QLabel("ABOUT THIS PROJECT", styleSheet="color: #64748B; font-size: 10px; font-weight: 800; letter-spacing: 0.5px;"))
-        self.lbl_detail_desc = QLabel("Project description goes here.")
+        self.lbl_detail_desc = make_translatable(QLabel(), "ui.project_description_goes")
         self.lbl_detail_desc.setWordWrap(True)
         self.lbl_detail_desc.setStyleSheet("color: #475569; font-size: 13px; line-height: 1.5; background: transparent;")
         dl.addWidget(self.lbl_detail_desc)
         
-        self.lbl_detail_github = QLabel("GitHub: https://github.com")
+        self.lbl_detail_github = make_translatable(QLabel(), "ui.github_httpsgithubcom")
         self.lbl_detail_github.setWordWrap(True)
         self.lbl_detail_github.setStyleSheet("color: #2563EB; font-size: 12px; background: transparent;")
         dl.addWidget(self.lbl_detail_github)
@@ -391,7 +394,7 @@ class ProjectPortfolioPage(QWidget):
         p_row.addWidget(self.lbl_detail_percent)
         pl.addLayout(p_row)
         
-        self.lbl_progress_status = QLabel("Determined by requirements checklist below.")
+        self.lbl_progress_status = make_translatable(QLabel(), "ui.determined_by_requirements")
         self.lbl_progress_status.setStyleSheet("color: #64748B; font-size: 11px; background: transparent;")
         pl.addWidget(self.lbl_progress_status)
         left_panel.addWidget(self.progress_card)
@@ -415,7 +418,7 @@ class ProjectPortfolioPage(QWidget):
         add_req_row = QHBoxLayout()
         add_req_row.setSpacing(8)
         self.edit_new_req = QLineEdit()
-        self.edit_new_req.setPlaceholderText("Enter new project requirement...")
+        self.edit_new_req.setPlaceholderText(Translator.translate("placeholder.enter_new_project")); self.edit_new_req.placeholder_translation_key = "placeholder.enter_new_project"
         self.edit_new_req.setStyleSheet("""
             QLineEdit {
                 background-color: #FFFFFF; color: #0F172A; border: 1px solid #CBD5E1;
@@ -426,7 +429,7 @@ class ProjectPortfolioPage(QWidget):
         self.edit_new_req.returnPressed.connect(self._add_requirement_inline)
         add_req_row.addWidget(self.edit_new_req, 4)
         
-        btn_add_req = QPushButton("+ Add")
+        btn_add_req = make_translatable(QPushButton(), "ui.add")
         btn_add_req.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_add_req.setStyleSheet("""
             QPushButton {
@@ -569,16 +572,16 @@ class ProjectPortfolioPage(QWidget):
                 c_header.addStretch()
                 
                 # Copy Markdown button
-                copy_btn = QPushButton("📋")
+                copy_btn = make_translatable(QPushButton(), "ui.str_9")
                 copy_btn.setFixedSize(24, 24)
                 copy_btn.setCursor(Qt.CursorShape.PointingHandCursor)
                 copy_btn.setStyleSheet("color: #64748B; border: none; background: transparent; font-size: 14px;")
-                copy_btn.setToolTip("Copy details in Markdown format")
+                copy_btn.setToolTip(Translator.translate("tooltip.copy_details_in"))
                 copy_btn.clicked.connect(lambda checked, p=project: self._copy_markdown(p))
                 c_header.addWidget(copy_btn)
                 
                 # Options button
-                opts = QPushButton("⋮")
+                opts = make_translatable(QPushButton(), "ui.str_10")
                 opts.setFixedSize(24, 24)
                 opts.setStyleSheet("color: #64748B; font-weight: 800; border: none; background: transparent; font-size: 16px;")
                 opts.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -710,7 +713,7 @@ class ProjectPortfolioPage(QWidget):
                 text += f"- {status} {r['requirement_text']}\n"
                 
         QGuiApplication.clipboard().setText(text)
-        QMessageBox.information(self, "Export Portfolio", "Project details copied to clipboard as Markdown!")
+        QMessageBox.information(self, Translator.translate("msg.title.export_portfolio"), Translator.translate("msg.text.project_details_copied"))
 
     def _on_card_clicked(self, project_data):
         self._show_project_detail(project_data)
@@ -727,7 +730,7 @@ class ProjectPortfolioPage(QWidget):
             self.lbl_detail_github.setText(f"GitHub/Link: <a href='{github}' style='color: #2563EB; text-decoration: none;'>{github}</a>")
             self.lbl_detail_github.setOpenExternalLinks(True)
         else:
-            self.lbl_detail_github.setText("No GitHub or Demo Link provided.")
+            self.lbl_detail_github.setText(Translator.translate("ui.no_github_or")); self.lbl_detail_github.translation_key = "ui.no_github_or"
             
         while self.detail_tech_container.count():
             item = self.detail_tech_container.takeAt(0)
@@ -781,7 +784,7 @@ class ProjectPortfolioPage(QWidget):
             chk.stateChanged.connect(lambda state, rid=r["id"], c=chk: self._on_requirement_toggled_inline(rid, c))
             row_lay.addWidget(chk, 1)
             
-            btn_sug = QPushButton("💡 Gợi ý")
+            btn_sug = make_translatable(QPushButton(), "dialog.goi_y")
             btn_sug.setFixedSize(75, 24)
             btn_sug.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_sug.setStyleSheet("""
@@ -813,10 +816,10 @@ class ProjectPortfolioPage(QWidget):
         self.detail_bar.setStyleSheet(f"QProgressBar {{ background: #F1F5F9; border-radius: 4px; border: none; }} QProgressBar::chunk {{ background: {color}; border-radius: 4px; }}")
         
         if prog == 100:
-            self.lbl_progress_status.setText("🎉 Project is fully completed!")
+            self.lbl_progress_status.setText(Translator.translate("ui.project_is_fully")); self.lbl_progress_status.translation_key = "ui.project_is_fully"
             self.lbl_progress_status.setStyleSheet("color: #10B981; font-weight: bold; font-size: 11px;")
         else:
-            self.lbl_progress_status.setText("Complete all project requirements to achieve 100%.")
+            self.lbl_progress_status.setText(Translator.translate("ui.complete_all_project")); self.lbl_progress_status.translation_key = "ui.complete_all_project"
             self.lbl_progress_status.setStyleSheet("color: #64748B; font-size: 11px;")
 
     def _on_requirement_toggled_inline(self, req_id, chk):
@@ -887,7 +890,7 @@ class ProjectPortfolioPage(QWidget):
         browser.setStyleSheet("QTextBrowser { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; color: #0F172A; padding: 10px; }")
         lay.addWidget(browser)
         
-        btn = QPushButton("Đóng")
+        btn = make_translatable(QPushButton(), "dialog.dong")
         btn.clicked.connect(dlg.accept)
         lay.addWidget(btn)
         dlg.exec()
@@ -937,5 +940,5 @@ class ProjectPortfolioPage(QWidget):
         )
         if reply == QMessageBox.StandardButton.Yes:
             portfolio_db.delete_project(self.active_project_id)
-            QMessageBox.information(self, "Success", "Project deleted successfully.")
+            QMessageBox.information(self, Translator.translate("msg.title.success"), Translator.translate("msg.text.project_deleted_successfully"))
             self._on_back_clicked()

@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 import sys
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QSpacerItem, QSizePolicy, QLineEdit,
@@ -16,7 +18,7 @@ COLOR_TEXT_SECONDARY = "#64748B"
 COLOR_BORDER = "#E2E8F0"
 
 
-class FeatureCard(QFrame):
+class FeatureCard(BaseTranslatableFrame):
     def __init__(self, title, desc, icon, parent=None):
         super().__init__(parent)
         self.setFixedHeight(80)
@@ -60,7 +62,7 @@ class FeatureCard(QFrame):
         layout.addStretch()
 
 
-class ModernInput(QWidget):
+class ModernInput(BaseTranslatableWidget):
     def __init__(self, label, placeholder, icon="", is_password=False, parent=None):
         super().__init__(parent)
         layout = QVBoxLayout(self)
@@ -112,7 +114,7 @@ class ModernInput(QWidget):
         cont_layout.addWidget(self.line_edit)
 
         if is_password:
-            self.toggle_btn = QPushButton("👁")
+            self.toggle_btn = make_translatable(QPushButton(), "ui.label_3")
             self.toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             self.toggle_btn.setStyleSheet(
                 f"color: {COLOR_TEXT_SECONDARY}; font-size: 16px; border: none; background: transparent;")
@@ -147,7 +149,7 @@ class ModernInput(QWidget):
             self.toggle_btn.setText("🔒")
         else:
             self.line_edit.setEchoMode(QLineEdit.EchoMode.Password)
-            self.toggle_btn.setText("👁")
+            self.toggle_btn.setText(Translator.translate("ui.label_3")); self.toggle_btn.translation_key = "ui.label_3"
 
     def text(self):
         return self.line_edit.text()
@@ -188,13 +190,13 @@ class SocialButton(QPushButton):
         """)
 
 
-class LoginPage(QWidget):
+class LoginPage(BaseTranslatableWidget):
     def __init__(self, on_login=None, on_register_click=None):
         super().__init__()
         self.on_login_callback = on_login
         self.on_register_click_callback = on_register_click
 
-        self.setWindowTitle("AI Career Bridge - Sign In")
+        self.setWindowTitle(Translator.translate("title.ai_career_bridge"))
         self.setStyleSheet(f"background-color: {COLOR_BG}; font-family: '{FONT_FAMILY}', sans-serif;")
 
         # --- 1. Master Wrapper Layout ---
@@ -231,9 +233,9 @@ class LoginPage(QWidget):
         # Logo Area
         logo_layout = QHBoxLayout()
         logo_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        logo_icon = QLabel("✧")
+        logo_icon = make_translatable(QLabel(), "ui.str_12")
         logo_icon.setStyleSheet(f"color: {COLOR_PRIMARY}; font-size: 28px;")
-        logo_text = QLabel("AI-Career Bridge")
+        logo_text = make_translatable(QLabel(), "sidebar.title")
         logo_text.setStyleSheet(
             f"color: {COLOR_TEXT_PRIMARY}; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;")
         logo_layout.addWidget(logo_icon)
@@ -243,14 +245,14 @@ class LoginPage(QWidget):
         left_layout.addSpacing(60)
 
         # Titles
-        self.title = QLabel("Build Your\nFuture With AI.")
+        self.title = make_translatable(QLabel(), "ui.build_yournfuture_with")
         self.title.setStyleSheet(
             f"color: {COLOR_TEXT_PRIMARY}; font-size: 42px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1;")
         left_layout.addWidget(self.title)
 
         left_layout.addSpacing(15)
 
-        self.subtitle = QLabel("Smart academic roadmap and career\nnetworking platform.")
+        self.subtitle = make_translatable(QLabel(), "ui.smart_academic_roadmap")
         self.subtitle.setStyleSheet(
             f"color: {COLOR_TEXT_SECONDARY}; font-size: 18px; font-weight: 500; line-height: 1.4;")
         left_layout.addWidget(self.subtitle)
@@ -280,7 +282,7 @@ class LoginPage(QWidget):
         status_layout.setSpacing(10)
         status_dot = QLabel("●")
         status_dot.setStyleSheet("color: #10B981; font-size: 10px;")
-        status_text = QLabel("All systems operational • v2.4.0")
+        status_text = make_translatable(QLabel(), "ui.all_systems_operational")
         status_text.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 12px; font-weight: 500;")
         status_layout.addWidget(status_dot)
         status_layout.addWidget(status_text)
@@ -302,7 +304,7 @@ class LoginPage(QWidget):
         # Top Right Controls
         top_controls = QHBoxLayout()
         top_controls.addStretch()
-        self.lang_btn = QPushButton("EN ▾")
+        self.lang_btn = make_translatable(QPushButton(), "ui.en")
         self.lang_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lang_btn.setStyleSheet(
             f"color: {COLOR_TEXT_SECONDARY}; font-size: 13px; font-weight: 600; border: none; background: transparent;")
@@ -339,12 +341,12 @@ class LoginPage(QWidget):
         header_layout.setSpacing(8)
         header_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.welcome_title = QLabel("Welcome Back")
+        self.welcome_title = make_translatable(QLabel(), "ui.welcome_back")
         self.welcome_title.setStyleSheet(
             f"color: {COLOR_TEXT_PRIMARY}; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;")
         self.welcome_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.welcome_sub = QLabel("Login to continue your journey.")
+        self.welcome_sub = make_translatable(QLabel(), "ui.login_to_continue")
         self.welcome_sub.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 15px; font-weight: 500;")
         self.welcome_sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -363,7 +365,7 @@ class LoginPage(QWidget):
 
         # Remember / Forgot
         options_layout = QHBoxLayout()
-        self.remember_cb = QCheckBox("Remember me")
+        self.remember_cb = make_translatable(QCheckBox(), "ui.remember_me")
         self.remember_cb.setCursor(Qt.CursorShape.PointingHandCursor)
         self.remember_cb.setStyleSheet(f"""
             QCheckBox {{ color: {COLOR_TEXT_SECONDARY}; font-size: 13px; font-weight: 500; spacing: 8px; }}
@@ -371,7 +373,7 @@ class LoginPage(QWidget):
             QCheckBox::indicator:checked {{ background: {COLOR_PRIMARY}; border: 1px solid {COLOR_PRIMARY}; }}
         """)
 
-        self.forgot_btn = QPushButton("Forgot password?")
+        self.forgot_btn = make_translatable(QPushButton(), "ui.forgot_password")
         self.forgot_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.forgot_btn.setStyleSheet(f"""
             QPushButton {{ color: {COLOR_PRIMARY}; font-size: 13px; font-weight: 600; border: none; background: transparent; }}
@@ -392,7 +394,7 @@ class LoginPage(QWidget):
         card_layout.addWidget(self.lbl_error)
 
         # Sign In Button
-        self.login_btn = QPushButton("Sign In")
+        self.login_btn = make_translatable(QPushButton(), "ui.sign_in")
         self.login_btn.setFixedHeight(48)
         self.login_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.login_btn.setStyleSheet(f"""
@@ -424,7 +426,7 @@ class LoginPage(QWidget):
         line2 = QFrame();
         line2.setFrameShape(QFrame.Shape.HLine);
         line2.setStyleSheet(f"color: {COLOR_BORDER};")
-        self.or_lbl = QLabel("or continue with")
+        self.or_lbl = make_translatable(QLabel(), "ui.or_continue_with")
         self.or_lbl.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 12px; font-weight: 500;")
         divider_layout.addWidget(line1)
         divider_layout.addWidget(self.or_lbl)
@@ -447,7 +449,7 @@ class LoginPage(QWidget):
         self.footer_text = QLabel("Don't have an account?")
         self.footer_text.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 14px; font-weight: 500;")
 
-        self.register_btn = QPushButton("Create Account")
+        self.register_btn = make_translatable(QPushButton(), "ui.create_account")
         self.register_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.register_btn.setStyleSheet(f"""
             QPushButton {{ color: {COLOR_TEXT_PRIMARY}; font-weight: 700; font-size: 14px; border: none; background: transparent; }}
@@ -482,7 +484,7 @@ class LoginPage(QWidget):
         email = self.email_entry.text().strip()
         password = self.password_entry.text().strip()
         if not email or not password:
-            self.lbl_error.setText("Email and password are required.")
+            self.lbl_error.setText(Translator.translate("ui.email_and_password")); self.lbl_error.translation_key = "ui.email_and_password"
             self.lbl_error.show()
             return
 
@@ -515,29 +517,29 @@ class LoginPage(QWidget):
     def _toggle_language(self):
         self.is_en = not getattr(self, "is_en", True)
         if self.is_en:
-            self.lang_btn.setText("EN ▾")
-            self.welcome_title.setText("Welcome Back")
-            self.welcome_sub.setText("Login to continue your journey.")
-            self.login_btn.setText("Sign In")
-            self.register_btn.setText("Create Account")
-            self.remember_cb.setText("Remember me")
-            self.forgot_btn.setText("Forgot password?")
-            self.title.setText("Build Your\nFuture With AI.")
-            self.subtitle.setText("Smart academic roadmap and career\nnetworking platform.")
-            self.or_lbl.setText("or continue with")
+            self.lang_btn.setText(Translator.translate("ui.en")); self.lang_btn.translation_key = "ui.en"
+            self.welcome_title.setText(Translator.translate("ui.welcome_back")); self.welcome_title.translation_key = "ui.welcome_back"
+            self.welcome_sub.setText(Translator.translate("ui.login_to_continue")); self.welcome_sub.translation_key = "ui.login_to_continue"
+            self.login_btn.setText(Translator.translate("ui.sign_in")); self.login_btn.translation_key = "ui.sign_in"
+            self.register_btn.setText(Translator.translate("ui.create_account")); self.register_btn.translation_key = "ui.create_account"
+            self.remember_cb.setText(Translator.translate("ui.remember_me")); self.remember_cb.translation_key = "ui.remember_me"
+            self.forgot_btn.setText(Translator.translate("ui.forgot_password")); self.forgot_btn.translation_key = "ui.forgot_password"
+            self.title.setText(Translator.translate("ui.build_yournfuture_with")); self.title.translation_key = "ui.build_yournfuture_with"
+            self.subtitle.setText(Translator.translate("ui.smart_academic_roadmap")); self.subtitle.translation_key = "ui.smart_academic_roadmap"
+            self.or_lbl.setText(Translator.translate("ui.or_continue_with")); self.or_lbl.translation_key = "ui.or_continue_with"
             self.footer_text.setText("Don't have an account?")
         else:
-            self.lang_btn.setText("VI ▾")
-            self.welcome_title.setText("Chào mừng trở lại")
-            self.welcome_sub.setText("Đăng nhập để tiếp tục hành trình của bạn.")
-            self.login_btn.setText("Đăng Nhập")
-            self.register_btn.setText("Tạo Tài Khoản")
-            self.remember_cb.setText("Ghi nhớ đăng nhập")
-            self.forgot_btn.setText("Quên mật khẩu?")
-            self.title.setText("Xây Dựng\nTương Lai Cùng AI.")
-            self.subtitle.setText("Lộ trình học tập thông minh và\nnền tảng kết nối nghề nghiệp.")
-            self.or_lbl.setText("hoặc tiếp tục với")
-            self.footer_text.setText("Chưa có tài khoản?")
+            self.lang_btn.setText(Translator.translate("ui.vi")); self.lang_btn.translation_key = "ui.vi"
+            self.welcome_title.setText(Translator.translate("ui.cho_mng_tr")); self.welcome_title.translation_key = "ui.cho_mng_tr"
+            self.welcome_sub.setText(Translator.translate("ui.ng_nhp_tip")); self.welcome_sub.translation_key = "ui.ng_nhp_tip"
+            self.login_btn.setText(Translator.translate("ui.ng_nhp")); self.login_btn.translation_key = "ui.ng_nhp"
+            self.register_btn.setText(Translator.translate("ui.to_ti_khon")); self.register_btn.translation_key = "ui.to_ti_khon"
+            self.remember_cb.setText(Translator.translate("ui.ghi_nh_ng")); self.remember_cb.translation_key = "ui.ghi_nh_ng"
+            self.forgot_btn.setText(Translator.translate("ui.qun_mt_khu")); self.forgot_btn.translation_key = "ui.qun_mt_khu"
+            self.title.setText(Translator.translate("ui.xy_dngntng_lai")); self.title.translation_key = "ui.xy_dngntng_lai"
+            self.subtitle.setText(Translator.translate("ui.l_trnh_hc")); self.subtitle.translation_key = "ui.l_trnh_hc"
+            self.or_lbl.setText(Translator.translate("ui.hoc_tip_tc")); self.or_lbl.translation_key = "ui.hoc_tip_tc"
+            self.footer_text.setText(Translator.translate("ui.cha_c_ti")); self.footer_text.translation_key = "ui.cha_c_ti"
 
     def _toggle_theme(self):
         pass

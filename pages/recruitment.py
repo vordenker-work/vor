@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 import sys
 import time
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
@@ -108,7 +110,7 @@ MOCK_JOBS = [
 # ==================================================
 # COMPACT JOB CARD
 # ==================================================
-class JobCard(QFrame):
+class JobCard(BaseTranslatableFrame):
     clicked = pyqtSignal(dict)
     
     def __init__(self, job_data, is_selected=False, parent=None):
@@ -198,7 +200,7 @@ class JobCard(QFrame):
 # ==================================================
 # SEARCH BAR
 # ==================================================
-class JobSearchBar(QFrame):
+class JobSearchBar(BaseTranslatableFrame):
     text_changed = pyqtSignal(str)
     
     def __init__(self, parent=None):
@@ -209,12 +211,12 @@ class JobSearchBar(QFrame):
         layout.setContentsMargins(12, 0, 12, 0)
         layout.setSpacing(8)
         
-        icon = QLabel("🔍")
+        icon = make_translatable(QLabel(), "ui.str_2")
         icon.setStyleSheet("color: #64748B; font-size: 13px; background: transparent; border: none;")
         layout.addWidget(icon)
         
         self.input = QLineEdit()
-        self.input.setPlaceholderText("Search jobs, companies, skills...")
+        self.input.setPlaceholderText(Translator.translate("placeholder.search_jobs_companies")); self.input.placeholder_translation_key = "placeholder.search_jobs_companies"
         self.input.setStyleSheet("background: transparent; color: #0F172A; font-size: 13px; font-weight: 500; border: none;")
         self.input.textChanged.connect(self.text_changed.emit)
         layout.addWidget(self.input)
@@ -222,7 +224,7 @@ class JobSearchBar(QFrame):
 # ==================================================
 # SKELETON LOADER
 # ==================================================
-class JobDetailSkeleton(QWidget):
+class JobDetailSkeleton(BaseTranslatableWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setStyleSheet("background-color: #FFFFFF;")
@@ -330,7 +332,7 @@ class JobDetailSkeleton(QWidget):
 # ==================================================
 # JOB DETAIL PANEL
 # ==================================================
-class JobDetailPanel(QWidget):
+class JobDetailPanel(BaseTranslatableWidget):
     apply_clicked = pyqtSignal(dict)
     
     def __init__(self, parent=None):
@@ -392,7 +394,7 @@ class JobDetailPanel(QWidget):
         self.header_v = QVBoxLayout()
         self.header_v.setSpacing(6)
         
-        self.title_lbl = QLabel("Select a Job")
+        self.title_lbl = make_translatable(QLabel(), "ui.select_a_job")
         self.title_lbl.setStyleSheet("font-size: 22px; font-weight: 800; color: #0F172A; background: transparent; border: none; letter-spacing: -0.5px;")
         self.title_lbl.setWordWrap(True)
         self.header_v.addWidget(self.title_lbl)
@@ -420,7 +422,7 @@ class JobDetailPanel(QWidget):
         self.desc_v = QVBoxLayout()
         self.desc_v.setSpacing(10)
         
-        self.desc_title = QLabel("Job Description")
+        self.desc_title = make_translatable(QLabel(), "ui.job_description")
         self.desc_title.setStyleSheet("font-size: 15px; font-weight: 700; color: #0F172A; background: transparent; border: none;")
         self.desc_v.addWidget(self.desc_title)
         
@@ -434,7 +436,7 @@ class JobDetailPanel(QWidget):
         self.skills_v = QVBoxLayout()
         self.skills_v.setSpacing(10)
         
-        self.skills_title = QLabel("Key Requirements & Skills")
+        self.skills_title = make_translatable(QLabel(), "ui.key_requirements_skills")
         self.skills_title.setStyleSheet("font-size: 15px; font-weight: 700; color: #0F172A; background: transparent; border: none;")
         self.skills_v.addWidget(self.skills_title)
         
@@ -482,7 +484,7 @@ class JobDetailPanel(QWidget):
             return
             
         self.btn_apply.setEnabled(True)
-        self.btn_apply.setText("Apply Now")
+        self.btn_apply.setText(Translator.translate("recruit.apply")); self.btn_apply.translation_key = "recruit.apply"
         self.title_lbl.setText(job_data.get("title", ""))
         self.company_lbl.setText(job_data.get("company", ""))
         
@@ -525,7 +527,7 @@ class JobDetailPanel(QWidget):
 # ==================================================
 # EMPTY STATE
 # ==================================================
-class JobEmptyState(QWidget):
+class JobEmptyState(BaseTranslatableWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setStyleSheet("background-color: #FFFFFF;")
@@ -538,12 +540,12 @@ class JobEmptyState(QWidget):
         icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(icon)
         
-        title = QLabel("Select a job opportunity")
+        title = make_translatable(QLabel(), "ui.select_a_job_1")
         title.setStyleSheet("font-size: 18px; font-weight: 800; color: #0F172A; background: transparent; border: none;")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title)
         
-        desc = QLabel("Choose a position from the list on the left to see full specifications, requirements, and submit your application details.")
+        desc = make_translatable(QLabel(), "ui.choose_a_position")
         desc.setStyleSheet("font-size: 13px; font-weight: 500; color: #64748B; background: transparent; border: none;")
         desc.setWordWrap(True)
         desc.setFixedWidth(320)
@@ -554,7 +556,7 @@ class JobEmptyState(QWidget):
 # ==================================================
 # ERROR STATE
 # ==================================================
-class JobErrorState(QWidget):
+class JobErrorState(BaseTranslatableWidget):
     retry_clicked = pyqtSignal()
     
     def __init__(self, parent=None):
@@ -564,24 +566,24 @@ class JobErrorState(QWidget):
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.setSpacing(16)
         
-        icon = QLabel("⚠️")
+        icon = make_translatable(QLabel(), "ui.str_11")
         icon.setStyleSheet("font-size: 64px; background: transparent; border: none;")
         icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(icon)
         
-        self.title = QLabel("Failed to load details")
+        self.title = make_translatable(QLabel(), "ui.failed_to_load")
         self.title.setStyleSheet("font-size: 18px; font-weight: 800; color: #EF4444; background: transparent; border: none;")
         self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.title)
         
-        self.desc = QLabel("Unable to fetch this job listing. The server might be offline or a connection timeout occurred.")
+        self.desc = make_translatable(QLabel(), "ui.unable_to_fetch")
         self.desc.setStyleSheet("font-size: 13px; font-weight: 500; color: #64748B; background: transparent; border: none;")
         self.desc.setWordWrap(True)
         self.desc.setFixedWidth(320)
         self.desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.desc)
         
-        self.btn_retry = QPushButton("Retry Request")
+        self.btn_retry = make_translatable(QPushButton(), "ui.retry_request")
         self.btn_retry.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_retry.setStyleSheet("""
             QPushButton {
@@ -607,7 +609,7 @@ class JobErrorState(QWidget):
 # ==================================================
 # LIST ERROR CARD
 # ==================================================
-class ListErrorCard(QFrame):
+class ListErrorCard(BaseTranslatableFrame):
     retry_clicked = pyqtSignal()
     
     def __init__(self, error_msg, parent=None):
@@ -623,7 +625,7 @@ class ListErrorCard(QFrame):
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(10)
         
-        title = QLabel("⚠️ Failed to Sync Jobs")
+        title = make_translatable(QLabel(), "ui.failed_to_sync")
         title.setStyleSheet("font-size: 13px; font-weight: 700; color: #991B1B; background: transparent; border: none;")
         layout.addWidget(title)
         
@@ -632,7 +634,7 @@ class ListErrorCard(QFrame):
         desc.setWordWrap(True)
         layout.addWidget(desc)
         
-        self.btn_retry = QPushButton("Retry Sync")
+        self.btn_retry = make_translatable(QPushButton(), "ui.retry_sync")
         self.btn_retry.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_retry.setStyleSheet("""
             QPushButton {
@@ -678,7 +680,7 @@ def extract_skills(title, description):
 # ==================================================
 # RECRUITMENT TOOLBAR
 # ==================================================
-class RecruitmentToolbar(QFrame):
+class RecruitmentToolbar(BaseTranslatableFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedHeight(74)
@@ -696,17 +698,17 @@ class RecruitmentToolbar(QFrame):
         
         title_h = QHBoxLayout()
         title_h.setSpacing(12)
-        title = QLabel("Job Openings & Recruitment")
+        title = make_translatable(QLabel(), "ui.job_openings_recruitment")
         title.setStyleSheet("font-size: 18px; font-weight: 800; color: #0F172A; border: none;")
         
-        badge = QLabel("Direct Matching")
+        badge = make_translatable(QLabel(), "ui.direct_matching")
         badge.setStyleSheet("font-size: 10px; font-weight: 800; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 6px; border: 1px solid #BFDBFE;")
         
         title_h.addWidget(title)
         title_h.addWidget(badge)
         title_h.addStretch()
         
-        summary = QLabel("Explore job opportunities matching your major and skills, and apply directly")
+        summary = make_translatable(QLabel(), "ui.explore_job_opportunities")
         summary.setStyleSheet("font-size: 11px; color: #64748B; font-weight: 600; border: none;")
         
         info_v.addLayout(title_h)
@@ -718,7 +720,7 @@ class RecruitmentToolbar(QFrame):
 # ==================================================
 # MAIN PAGE WIDGET
 # ==================================================
-class RecruitmentPage(QWidget):
+class RecruitmentPage(BaseTranslatableWidget):
     def __init__(self, parent=None, controller=None):
         super().__init__(parent)
         self.controller = controller
@@ -913,7 +915,7 @@ class RecruitmentPage(QWidget):
         self.clear_job_list()
         
         # Show a subtle loading indicator in the job list
-        loading_lbl = QLabel("Fetching latest jobs...")
+        loading_lbl = make_translatable(QLabel(), "ui.fetching_latest_jobs")
         loading_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         loading_lbl.setStyleSheet("font-size: 13px; font-weight: 600; color: #64748B; padding: 20px; background: transparent;")
         self.list_layout.addWidget(loading_lbl)
@@ -975,7 +977,7 @@ class RecruitmentPage(QWidget):
             job_id = self.selected_job_data.get("id")
             if job_id in self.applied_job_ids:
                 self.detail_panel.btn_apply.setEnabled(False)
-                self.detail_panel.btn_apply.setText("Applied")
+                self.detail_panel.btn_apply.setText(Translator.translate("ui.applied")); self.detail_panel.btn_apply.translation_key = "ui.applied"
 
     def clear_job_list(self):
         while self.list_layout.count():
@@ -1042,7 +1044,7 @@ class RecruitmentPage(QWidget):
             
         # If no jobs match
         if not jobs_to_filter and self.list_layout.count() == 0:
-            empty_lbl = QLabel("No jobs loaded. Please verify connection or retry.")
+            empty_lbl = make_translatable(QLabel(), "ui.no_jobs_loaded")
             empty_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty_lbl.setStyleSheet("font-size: 12px; font-weight: 500; color: #64748B; padding: 20px;")
             empty_lbl.setWordWrap(True)
@@ -1100,7 +1102,7 @@ class RecruitmentPage(QWidget):
             self.detail_panel.update_job(full_job_data)
             if full_job_data.get("id") in getattr(self, "applied_job_ids", []):
                 self.detail_panel.btn_apply.setEnabled(False)
-                self.detail_panel.btn_apply.setText("Applied")
+                self.detail_panel.btn_apply.setText(Translator.translate("ui.applied")); self.detail_panel.btn_apply.translation_key = "ui.applied"
             self.detail_stack.setCurrentIndex(2)
             AnimationEngine.fade_in_widget(self.detail_panel.content_widget, delay_ms=0, duration=400)
             
@@ -1116,13 +1118,13 @@ class RecruitmentPage(QWidget):
         from database import crud
         student = crud.get_current_student()
         if not student:
-            QMessageBox.warning(self, "Warning", "You must be logged in to apply for jobs.")
+            QMessageBox.warning(self, Translator.translate("msg.title.warning"), Translator.translate("msg.text.you_must_be"))
             return
 
         email = student.get("email")
         display_name = student.get("display_name") or student.get("username") or email
         if not email:
-            QMessageBox.warning(self, "Warning", "Student profile has no email address. Cannot apply.")
+            QMessageBox.warning(self, Translator.translate("msg.title.warning"), Translator.translate("msg.text.student_profile_has"))
             return
 
         # Cancel active apply worker if running
@@ -1137,7 +1139,7 @@ class RecruitmentPage(QWidget):
 
         # Disable button and update text
         self.detail_panel.btn_apply.setEnabled(False)
-        self.detail_panel.btn_apply.setText("Applying...")
+        self.detail_panel.btn_apply.setText(Translator.translate("ui.applying")); self.detail_panel.btn_apply.translation_key = "ui.applying"
 
         # Start background worker
         from modules.recruitment_worker import JobApplyWorker
@@ -1153,9 +1155,9 @@ class RecruitmentPage(QWidget):
         self.apply_worker.start()
 
     def _on_apply_success(self):
-        QMessageBox.information(self, "Success", "Job application submitted successfully!")
+        QMessageBox.information(self, Translator.translate("msg.title.success"), Translator.translate("msg.text.job_application_submitted"))
         self.detail_panel.btn_apply.setEnabled(False)
-        self.detail_panel.btn_apply.setText("Applied")
+        self.detail_panel.btn_apply.setText(Translator.translate("ui.applied")); self.detail_panel.btn_apply.translation_key = "ui.applied"
         if self.selected_job_data:
             job_id = self.selected_job_data.get("id")
             if job_id not in self.applied_job_ids:
@@ -1164,7 +1166,7 @@ class RecruitmentPage(QWidget):
     def _on_apply_failed(self, error_msg):
         QMessageBox.critical(self, "Error", f"Failed to submit job application:\n{error_msg}")
         self.detail_panel.btn_apply.setEnabled(True)
-        self.detail_panel.btn_apply.setText("Apply Now")
+        self.detail_panel.btn_apply.setText(Translator.translate("recruit.apply")); self.detail_panel.btn_apply.translation_key = "recruit.apply"
 
     def cleanup(self):
         """

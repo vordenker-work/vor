@@ -1,10 +1,11 @@
+from core.translation.base_translatable_widget import BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
 import sys
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, 
                              QGridLayout, QLabel, QLineEdit, QPushButton, QFrame, QGraphicsDropShadowEffect)
 from PyQt6.QtCore import Qt, QPoint, QRectF
 from PyQt6.QtGui import QColor, QPainter, QLinearGradient, QPen, QBrush
 
-class NeumorphicFrame(QFrame):
+class NeumorphicFrame(BaseTranslatableFrame):
     """
     Highly optimized Neumorphism container.
     """

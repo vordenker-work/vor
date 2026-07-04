@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QComboBox, QMessageBox, QWidget
@@ -5,11 +7,11 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from database import skill_tree_db
 
-class EdgeDialog(QDialog):
+class EdgeDialog(BaseTranslatableDialog):
     def __init__(self, current_branch_name=None, parent=None):
         super().__init__(parent)
         self.current_branch_name = current_branch_name
-        self.setWindowTitle("Manage Skill Connections")
+        self.setWindowTitle(Translator.translate("title.manage_skill_connections"))
         self.resize(450, 400)
         self.setStyleSheet("""
             QDialog {
@@ -74,14 +76,14 @@ class EdgeDialog(QDialog):
         self.layout.setContentsMargins(20, 20, 20, 20)
 
         # 1. Action Type Selection
-        self.layout.addWidget(QLabel("Select Action:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.select_action"))
         self.action_combo = QComboBox()
         self.action_combo.addItems(["Add Connection Path", "Remove Connection Path"])
         self.action_combo.currentIndexChanged.connect(self._toggle_action_view)
         self.layout.addWidget(self.action_combo)
 
         # 2. Branch selection (all actions need a branch context)
-        self.layout.addWidget(QLabel("Skill Branch:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.skill_branch"))
         self.branch_combo = QComboBox()
         self.branch_combo.currentIndexChanged.connect(self._on_branch_changed)
         self.layout.addWidget(self.branch_combo)
@@ -94,15 +96,15 @@ class EdgeDialog(QDialog):
         add_lay.setContentsMargins(0, 0, 0, 0)
         add_lay.setSpacing(12)
 
-        add_lay.addWidget(QLabel("Prerequisite Skill (From):"))
+        add_lay.addWidget(make_translatable(QLabel(), "dialog.prerequisite_skill_from"))
         self.source_combo = QComboBox()
         add_lay.addWidget(self.source_combo)
 
-        add_lay.addWidget(QLabel("Next Skill (To):"))
+        add_lay.addWidget(make_translatable(QLabel(), "dialog.next_skill_to"))
         self.target_combo = QComboBox()
         add_lay.addWidget(self.target_combo)
 
-        self.btn_add_submit = QPushButton("Add Connection")
+        self.btn_add_submit = make_translatable(QPushButton(), "dialog.add_connection")
         self.btn_add_submit.setObjectName("btnPrimary")
         self.btn_add_submit.clicked.connect(self._submit_add)
         add_lay.addWidget(self.btn_add_submit)
@@ -117,11 +119,11 @@ class EdgeDialog(QDialog):
         delete_lay.setContentsMargins(0, 0, 0, 0)
         delete_lay.setSpacing(12)
 
-        delete_lay.addWidget(QLabel("Select Connection to Remove:"))
+        delete_lay.addWidget(make_translatable(QLabel(), "dialog.select_connection_to"))
         self.edge_combo = QComboBox()
         delete_lay.addWidget(self.edge_combo)
 
-        self.btn_delete_submit = QPushButton("Remove Connection")
+        self.btn_delete_submit = make_translatable(QPushButton(), "dialog.remove_connection")
         self.btn_delete_submit.setObjectName("btnDelete")
         self.btn_delete_submit.clicked.connect(self._submit_delete)
         delete_lay.addWidget(self.btn_delete_submit)
@@ -179,25 +181,25 @@ class EdgeDialog(QDialog):
         target_id = self.target_combo.currentData()
 
         if source_id == target_id:
-            QMessageBox.warning(self, "Validation Error", "A skill cannot be connected to itself.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.a_skill_cannot"))
             return
 
         if not source_id or not target_id:
-            QMessageBox.warning(self, "Validation Error", "Invalid skills selected.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.invalid_skills_selected"))
             return
 
         res = skill_tree_db.add_edge(branch_name, source_id, target_id)
         if res:
-            QMessageBox.information(self, "Success", "Connection path added successfully!")
+            QMessageBox.information(self, Translator.translate("msg.title.success"), Translator.translate("msg.text.connection_path_added"))
             self._on_branch_changed()
             self.accept()
         else:
-            QMessageBox.warning(self, "Error", "This connection already exists or creates a cyclic dependency loop.")
+            QMessageBox.warning(self, Translator.translate("msg.title.error"), Translator.translate("msg.text.this_connection_already"))
 
     def _submit_delete(self):
         edge_id = self.edge_combo.currentData()
         if not edge_id:
-            QMessageBox.warning(self, "Validation Error", "No connection selected to remove.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.no_connection_selected"))
             return
 
         reply = QMessageBox.question(
@@ -207,6 +209,6 @@ class EdgeDialog(QDialog):
         )
         if reply == QMessageBox.StandardButton.Yes:
             skill_tree_db.delete_edge(edge_id)
-            QMessageBox.information(self, "Success", "Connection path removed successfully!")
+            QMessageBox.information(self, Translator.translate("msg.title.success"), Translator.translate("msg.text.connection_path_removed"))
             self._on_branch_changed()
             self.accept()

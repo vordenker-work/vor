@@ -1,10 +1,11 @@
+from core.translation.base_translatable_widget import BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
 from PyQt6.QtWidgets import QFrame, QGraphicsDropShadowEffect, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QProgressBar, QPushButton, QSizePolicy
 from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve, pyqtProperty, QRectF, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QPainter, QPen, QBrush, QCursor
 from core.config import COLOR_BG_CARD, COLOR_BORDER, COLOR_PRIMARY, COLOR_BG_APP, COLOR_TEXT_MAIN, COLOR_TEXT_SUB, COLOR_PRIMARY_LIGHT
 from ui_core.neumorphic_components import NeumorphicFrame
 
-class SaaSCard(QFrame):
+class SaaSCard(BaseTranslatableFrame):
     def __init__(self, parent=None, radius=12, offset=4, blur=15, border_color=None):
         super().__init__(parent)
         self.setObjectName("SaaSCard")
@@ -81,7 +82,7 @@ class AnimatedProgressBar(QProgressBar):
         self.animation.setEndValue(int(progress_float * 100))
         self.animation.start()
 
-class StatusPulse(QWidget):
+class StatusPulse(BaseTranslatableWidget):
     def __init__(self, color=COLOR_PRIMARY, size=8, parent=None):
         super().__init__(parent)
         self.setFixedSize(size, size)
@@ -114,7 +115,7 @@ class ChipButton(QPushButton):
             }}
         """)
 
-class AnimatedCircularProgress(QWidget):
+class AnimatedCircularProgress(BaseTranslatableWidget):
     def __init__(self, parent=None, size=100, color=COLOR_PRIMARY):
         super().__init__(parent)
         self.setFixedSize(size, size)
@@ -175,7 +176,7 @@ class CountUpLabel(QLabel):
         else: self._curr += (self._target - self._curr) / 10
         self.setText(self.format_str.format(int(self._curr)) + self.suffix)
 
-class ModernSwitch(QWidget):
+class ModernSwitch(BaseTranslatableWidget):
     def __init__(self, parent=None, active_color=COLOR_PRIMARY, bg_color=COLOR_BORDER):
         super().__init__(parent)
         self.setFixedSize(44, 24)
@@ -222,7 +223,7 @@ class ModernSwitch(QWidget):
         painter.setBrush(QColor(self._circle_color))
         painter.drawEllipse(QRectF(self._x_pos, 4, 16, 16))
 
-class CollapsiblePanel(QFrame):
+class CollapsiblePanel(BaseTranslatableFrame):
     """
     Generic Animated Collapsible Panel.
     Can be oriented to collapse to the left or right.

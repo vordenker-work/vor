@@ -96,6 +96,23 @@ def init_db():
     )
     ''')
 
+    # Migration for student_grades table
+    cursor.execute("PRAGMA table_info(student_grades)")
+    sg_columns = [col[1] for col in cursor.fetchall()]
+    if sg_columns:
+        if "attempt" not in sg_columns:
+            cursor.execute("ALTER TABLE student_grades ADD COLUMN attempt INTEGER DEFAULT 1;")
+        if "grade_cc" not in sg_columns:
+            cursor.execute("ALTER TABLE student_grades ADD COLUMN grade_cc REAL;")
+        if "grade_bt" not in sg_columns:
+            cursor.execute("ALTER TABLE student_grades ADD COLUMN grade_bt REAL;")
+        if "grade_gk" not in sg_columns:
+            cursor.execute("ALTER TABLE student_grades ADD COLUMN grade_gk REAL;")
+        if "grade_ck" not in sg_columns:
+            cursor.execute("ALTER TABLE student_grades ADD COLUMN grade_ck REAL;")
+        if "grade_t10" not in sg_columns:
+            cursor.execute("ALTER TABLE student_grades ADD COLUMN grade_t10 REAL;")
+
     # 5. Project Requirements Table
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS project_requirements (

@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 import webbrowser
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
@@ -7,7 +9,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QGuiApplication
 from database import portfolio_db
 
-class ProjectDetailDialog(QDialog):
+class ProjectDetailDialog(BaseTranslatableDialog):
     def __init__(self, project_data, parent=None):
         super().__init__(parent)
         self.project_data = project_data
@@ -196,14 +198,14 @@ class ProjectDetailDialog(QDialog):
         # Inline Add Form
         add_req_lay = QHBoxLayout()
         self.edit_new_req = QLineEdit()
-        self.edit_new_req.setPlaceholderText("Thêm yêu cầu mới (ví dụ: Đăng nhập JWT)...")
+        self.edit_new_req.setPlaceholderText(Translator.translate("placeholder.thm_yu_cu")); self.edit_new_req.placeholder_translation_key = "placeholder.thm_yu_cu"
         self.edit_new_req.setStyleSheet("""
             QLineEdit {
                 background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px;
                 color: #0F172A; padding: 4px 8px; font-size: 11px;
             }
         """)
-        btn_add_req = QPushButton("+ Thêm")
+        btn_add_req = make_translatable(QPushButton(), "dialog.them")
         btn_add_req.setFixedSize(60, 24)
         btn_add_req.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_add_req.setStyleSheet("""
@@ -237,13 +239,13 @@ class ProjectDetailDialog(QDialog):
             self.btn_github.setEnabled(False)
         btn_layout.addWidget(self.btn_github)
 
-        self.btn_export = QPushButton("📋 Copy MD")
-        self.btn_export.setToolTip("Copy project details in Markdown portfolio format")
+        self.btn_export = make_translatable(QPushButton(), "dialog.copy_md")
+        self.btn_export.setToolTip(Translator.translate("tooltip.copy_project_details")); self.btn_export.tooltip_translation_key = "tooltip.copy_project_details"
         self.btn_export.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_export.clicked.connect(self._export_markdown)
         btn_layout.addWidget(self.btn_export)
 
-        self.btn_edit = QPushButton("✏️ Edit")
+        self.btn_edit = make_translatable(QPushButton(), "dialog.edit")
         self.btn_edit.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_edit.clicked.connect(self._request_edit)
         btn_layout.addWidget(self.btn_edit)
@@ -256,7 +258,7 @@ class ProjectDetailDialog(QDialog):
         layout.addLayout(btn_layout)
 
         # Close button
-        btn_close = QPushButton("Close")
+        btn_close = make_translatable(QPushButton(), "button.close")
         btn_close.clicked.connect(self.accept)
         layout.addWidget(btn_close)
         
@@ -307,7 +309,7 @@ class ProjectDetailDialog(QDialog):
                 text += f"- {status} {t['task_name']}\n"
                 
         QGuiApplication.clipboard().setText(text)
-        QMessageBox.information(self, "Export Portfolio", "Project details copied to clipboard as Markdown!")
+        QMessageBox.information(self, Translator.translate("msg.title.export_portfolio"), Translator.translate("msg.text.project_details_copied"))
 
     def _request_edit(self):
         self.action_requested = "edit"
@@ -321,7 +323,7 @@ class ProjectDetailDialog(QDialog):
         )
         if reply == QMessageBox.StandardButton.Yes:
             portfolio_db.delete_project(self.project_data["id"])
-            QMessageBox.information(self, "Success", "Project deleted successfully.")
+            QMessageBox.information(self, Translator.translate("msg.title.success"), Translator.translate("msg.text.project_deleted_successfully"))
             self.action_requested = "delete"
             self.accept()
 
@@ -346,7 +348,7 @@ class ProjectDetailDialog(QDialog):
             chk.stateChanged.connect(lambda state, rid=r["id"], c=chk: self._on_requirement_toggled(rid, c))
             row_lay.addWidget(chk, 4)
             
-            btn_sug = QPushButton("💡 Gợi ý")
+            btn_sug = make_translatable(QPushButton(), "dialog.goi_y")
             btn_sug.setFixedSize(65, 20)
             btn_sug.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_sug.setStyleSheet("""
@@ -437,7 +439,7 @@ class ProjectDetailDialog(QDialog):
         browser.setStyleSheet("QTextBrowser { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; color: #0F172A; padding: 10px; }")
         lay.addWidget(browser)
         
-        btn = QPushButton("Đóng")
+        btn = make_translatable(QPushButton(), "dialog.dong")
         btn.clicked.connect(dlg.accept)
         lay.addWidget(btn)
         dlg.exec()

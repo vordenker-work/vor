@@ -1,3 +1,5 @@
+from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 import json
 import sys
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, 
@@ -10,7 +12,7 @@ from ui_core.components import SaaSCard, StatusPulse, CollapsiblePanel
 from database import crud
 from core.i18n import _
 
-class ModernCard(QFrame):
+class ModernCard(BaseTranslatableFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("ModernCard")
@@ -66,7 +68,7 @@ class IconButton(QPushButton):
             }
         """)
 
-class SearchBar(QFrame):
+class SearchBar(BaseTranslatableFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedSize(220, 36)
@@ -75,12 +77,12 @@ class SearchBar(QFrame):
         layout.setContentsMargins(10, 0, 10, 0)
         layout.setSpacing(6)
         
-        icon = QLabel("🔍")
+        icon = make_translatable(QLabel(), "ui.str_2")
         icon.setStyleSheet("color: #64748B; font-size: 12px;")
         layout.addWidget(icon)
         
         self.input = QLineEdit()
-        self.input.setPlaceholderText("Search workspace...")
+        self.input.setPlaceholderText(Translator.translate("placeholder.search_workspace")); self.input.placeholder_translation_key = "placeholder.search_workspace"
         self.input.setStyleSheet("background: transparent; color: #0F172A; font-size: 13px; font-weight: 500; border: none;")
         layout.addWidget(self.input)
         layout.addStretch()
@@ -104,7 +106,7 @@ class KPICard(ModernCard):
         self.internal_layout.addWidget(lbl_change)
         self.internal_layout.addStretch()
 
-class DashboardOverviewView(QWidget):
+class DashboardOverviewView(BaseTranslatableWidget):
     """The original dashboard content, now fully dynamic based on AI status."""
     def __init__(self, parent=None, controller=None):
         super().__init__(parent)
@@ -231,16 +233,16 @@ class DashboardOverviewView(QWidget):
         banner_layout.setContentsMargins(32, 32, 32, 32)
         
         text_layout = QVBoxLayout()
-        greeting = QLabel("Welcome to your Academic Portal")
+        greeting = make_translatable(QLabel(), "ui.welcome_to_your")
         greeting.setStyleSheet("color: white; font-size: 24px; font-weight: 800;")
-        desc = QLabel("Let the AI analyze your strengths, weaknesses, and courses to generate a personalized study roadmap and weekly task list.")
+        desc = make_translatable(QLabel(), "ui.let_the_ai")
         desc.setStyleSheet("color: #94A3B8; font-size: 14px; margin-top: 8px;")
         desc.setWordWrap(True)
         text_layout.addWidget(greeting)
         text_layout.addWidget(desc)
         banner_layout.addLayout(text_layout, 1)
         
-        emoji = QLabel("✨")
+        emoji = make_translatable(QLabel(), "ui.str_3")
         emoji.setStyleSheet("font-size: 48px; background: transparent;")
         banner_layout.addWidget(emoji)
         layout.addWidget(banner)
@@ -250,17 +252,17 @@ class DashboardOverviewView(QWidget):
         pc_layout = prompt_card.internal_layout
         pc_layout.setSpacing(16)
         
-        prompt_title = QLabel("Ready to generate your study plan?")
+        prompt_title = make_translatable(QLabel(), "ui.ready_to_generate")
         prompt_title.setStyleSheet("color: #0F172A; font-size: 18px; font-weight: 700;")
         pc_layout.addWidget(prompt_title)
         
         if has_raw_input:
-            prompt_desc = QLabel("You have successfully set up your profile context! Click the button below to sync with the server and start plan generation.")
+            prompt_desc = make_translatable(QLabel(), "ui.you_have_successfully")
             prompt_desc.setStyleSheet("color: #475569; font-size: 14px;")
             prompt_desc.setWordWrap(True)
             pc_layout.addWidget(prompt_desc)
             
-            btn_gen = QPushButton("✨ Generate Academic Plan")
+            btn_gen = make_translatable(QPushButton(), "ui.generate_academic_plan")
             btn_gen.setFixedHeight(44)
             btn_gen.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_gen.setStyleSheet("""
@@ -270,12 +272,12 @@ class DashboardOverviewView(QWidget):
             btn_gen.clicked.connect(self.start_generation)
             pc_layout.addWidget(btn_gen)
         else:
-            prompt_desc = QLabel("You need to complete your academic profile details first (Display Name, University, Major, courses, skills, and goals) so the AI has context to work with.")
+            prompt_desc = make_translatable(QLabel(), "ui.you_need_to")
             prompt_desc.setStyleSheet("color: #EF4444; font-size: 14px; font-weight: 600;")
             prompt_desc.setWordWrap(True)
             pc_layout.addWidget(prompt_desc)
             
-            btn_profile = QPushButton("👉 Complete Academic Profile")
+            btn_profile = make_translatable(QPushButton(), "ui.complete_academic_profile")
             btn_profile.setFixedHeight(44)
             btn_profile.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_profile.setStyleSheet("background: #0F172A; color: white; font-weight: 700; font-size: 14px; border-radius: 10px;")
@@ -296,15 +298,15 @@ class DashboardOverviewView(QWidget):
         pc_layout.setSpacing(20)
         pc_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        loader_lbl = QLabel("⏳")
+        loader_lbl = make_translatable(QLabel(), "ui.str_4")
         loader_lbl.setStyleSheet("font-size: 64px;")
         loader_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        title_lbl = QLabel("AI is generating your academic plan...")
+        title_lbl = make_translatable(QLabel(), "ui.ai_is_generating")
         title_lbl.setStyleSheet("color: #0F172A; font-size: 20px; font-weight: 800;")
         title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        desc_lbl = QLabel("Our AI engine is currently analyzing your inputs and drafting a weekly study scheduler and milestones roadmap. This may take a few minutes.\nGeneration is still running locally. You can leave this page and polling will resume.")
+        desc_lbl = make_translatable(QLabel(), "ui.our_ai_engine")
         desc_lbl.setStyleSheet("color: #64748B; font-size: 14px; line-height: 1.5;")
         desc_lbl.setWordWrap(True)
         desc_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -314,7 +316,7 @@ class DashboardOverviewView(QWidget):
         progress.setFixedHeight(8)
         progress.setStyleSheet("QProgressBar { background: #F1F5F9; border-radius: 4px; } QProgressBar::chunk { background: #2563EB; border-radius: 4px; }")
         
-        btn_refresh = QPushButton("🔄 Refresh Status Now")
+        btn_refresh = make_translatable(QPushButton(), "ui.refresh_status_now")
         btn_refresh.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_refresh.setFixedHeight(36)
         btn_refresh.setFixedWidth(180)
@@ -370,7 +372,7 @@ class DashboardOverviewView(QWidget):
         actions = QHBoxLayout()
         actions.setSpacing(10)
         
-        btn_regen = QPushButton("✨ Regenerate AI Plan")
+        btn_regen = make_translatable(QPushButton(), "ui.regenerate_ai_plan")
         btn_regen.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_regen.setFixedHeight(40)
         btn_regen.setStyleSheet("""
@@ -392,7 +394,7 @@ class DashboardOverviewView(QWidget):
         """)
         btn_regen.clicked.connect(self.start_generation)
         
-        btn_profile = QPushButton("🗺️ Update Profile Context")
+        btn_profile = make_translatable(QPushButton(), "ui.update_profile_context")
         btn_profile.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_profile.setFixedHeight(36)
         btn_profile.setStyleSheet("background: rgba(255,255,255,0.1); color: white; font-weight: 600; font-size: 13px; border-radius: 18px; padding: 0 16px; border: 1px solid rgba(255,255,255,0.2);")
@@ -409,7 +411,7 @@ class DashboardOverviewView(QWidget):
         
         b_layout.addLayout(left_layout, 1)
         
-        rocket = QLabel("🚀")
+        rocket = make_translatable(QLabel(), "ui.str_5")
         rocket.setStyleSheet("font-size: 56px; background: transparent;")
         b_layout.addWidget(rocket, alignment=Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(banner)
@@ -468,7 +470,7 @@ class DashboardOverviewView(QWidget):
         sl.setSpacing(12)
         sl.setContentsMargins(24, 20, 24, 20)
         
-        s_title = QLabel("Skill Proficiency Radar")
+        s_title = make_translatable(QLabel(), "ui.skill_proficiency_radar")
         s_title.setStyleSheet("color: #0F172A; font-size: 16px; font-weight: 800;")
         sl.addWidget(s_title)
         
@@ -508,12 +510,12 @@ class DashboardOverviewView(QWidget):
         rl = roadmap_panel.internal_layout
         rl.setSpacing(12)
         
-        r_title = QLabel("AI Academic Roadmap")
+        r_title = make_translatable(QLabel(), "ui.ai_academic_roadmap")
         r_title.setStyleSheet("color: #0F172A; font-size: 16px; font-weight: 700;")
         rl.addWidget(r_title)
         
         if not roadmap_list:
-            empty_lbl = QLabel("No roadmap generated yet. Pending AI insights.")
+            empty_lbl = make_translatable(QLabel(), "ui.no_roadmap_generated")
             empty_lbl.setStyleSheet("color: #94A3B8; font-size: 13px; font-style: italic;")
             rl.addWidget(empty_lbl)
         else:
@@ -571,12 +573,12 @@ class DashboardOverviewView(QWidget):
         tl = tasks_card.internal_layout
         tl.setSpacing(16)
         
-        t_header = QLabel("AI Recommended Tasks This Week")
+        t_header = make_translatable(QLabel(), "ui.ai_recommended_tasks")
         t_header.setStyleSheet("color: #0F172A; font-size: 16px; font-weight: 800;")
         tl.addWidget(t_header)
         
         if not all_tasks:
-            empty_tasks = QLabel("No tasks assigned yet. Enjoy your free time!")
+            empty_tasks = make_translatable(QLabel(), "ui.no_tasks_assigned")
             empty_tasks.setStyleSheet("color: #94A3B8; font-size: 14px; font-style: italic;")
             empty_tasks.setWordWrap(True)
             tl.addWidget(empty_tasks)
@@ -602,7 +604,7 @@ class DashboardOverviewView(QWidget):
                 l.setContentsMargins(12, 12, 12, 12)
                 l.setSpacing(12)
                 
-                chk_lbl = QLabel("⭕")
+                chk_lbl = make_translatable(QLabel(), "ui.str_6")
                 chk_lbl.setStyleSheet("font-size: 18px; color: #94A3B8; background: transparent; border: none;")
                 chk_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
                 chk_lbl.mousePressEvent = lambda e, td=t_orig, is_ai_flag=is_ai: self._complete_task(td, is_ai_flag)
@@ -642,7 +644,7 @@ class DashboardOverviewView(QWidget):
         il = insights_card.internal_layout
         il.setSpacing(16)
         
-        i_title = QLabel("✨ Skills Analysis & Focus Areas")
+        i_title = make_translatable(QLabel(), "ui.skills_analysis_focus")
         i_title.setStyleSheet("color: #0F172A; font-size: 16px; font-weight: 800;")
         il.addWidget(i_title)
         
@@ -651,7 +653,7 @@ class DashboardOverviewView(QWidget):
         focus_areas = skill_analysis.get("recommended_focus")
         
         if isinstance(focus_areas, list) and focus_areas:
-            intro_msg = QLabel("To achieve your goals, prioritize these key skills:")
+            intro_msg = make_translatable(QLabel(), "ui.to_achieve_your")
             intro_msg.setStyleSheet("color: #334155; font-size: 13px; font-weight: 600;")
             intro_msg.setWordWrap(True)
             il.addWidget(intro_msg)
@@ -663,7 +665,7 @@ class DashboardOverviewView(QWidget):
                 row_l.setContentsMargins(0, 0, 0, 0)
                 row_l.setSpacing(8)
                 
-                bullet = QLabel("🎯")
+                bullet = make_translatable(QLabel(), "ui.str_7")
                 bullet.setStyleSheet("font-size: 14px; background: transparent;")
                 row_l.addWidget(bullet, alignment=Qt.AlignmentFlag.AlignTop)
                 
@@ -674,7 +676,7 @@ class DashboardOverviewView(QWidget):
                 
                 il.addWidget(row)
         else:
-            msg = QLabel("Keep studying courses on your roadmap. AI advises maintaining high study hours.")
+            msg = make_translatable(QLabel(), "ui.keep_studying_courses")
             msg.setWordWrap(True)
             msg.setStyleSheet("color: #475569; font-size: 14px; line-height: 1.5;")
             il.addWidget(msg)
@@ -701,7 +703,7 @@ class DashboardOverviewView(QWidget):
         el.setContentsMargins(20, 20, 20, 20)
         el.setSpacing(8)
         
-        title = QLabel("❌ AI Plan Generation Failed")
+        title = make_translatable(QLabel(), "ui.ai_plan_generation")
         title.setStyleSheet("color: #991B1B; font-size: 16px; font-weight: 700;")
         
         desc = QLabel(f"The backend server encountered an error while generating your plan:")
@@ -712,7 +714,7 @@ class DashboardOverviewView(QWidget):
         err.setStyleSheet("color: #B91C1C; font-size: 14px;")
         err.setWordWrap(True)
         
-        btn_retry = QPushButton("Retry Generation")
+        btn_retry = make_translatable(QPushButton(), "ui.retry_generation")
         btn_retry.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_retry.setStyleSheet("background: #EF4444; color: white; border-radius: 6px; padding: 8px 16px; font-weight: 600; margin-top: 10px;")
         btn_retry.clicked.connect(self.start_generation)
@@ -765,7 +767,7 @@ class DashboardOverviewView(QWidget):
     def _goto_tasks(self):
         if self.controller:
             self.controller.show_page("SmartTaskPlanner")
-        fallback_title = QLabel("Dashboard (Unavailable)")
+        fallback_title = make_translatable(QLabel(), "ui.dashboard_unavailable")
         fallback_title.setStyleSheet("color: #64748B; font-size: 14px; font-weight: 700; margin-top: 10px;")
         layout.addWidget(fallback_title)
         
@@ -796,7 +798,7 @@ class DashboardOverviewView(QWidget):
     def start_generation(self):
         session = crud.get_session()
         if not session:
-            QMessageBox.warning(self, "Authentication Required", "Please log in to generate an academic plan.")
+            QMessageBox.warning(self, Translator.translate("msg.title.authentication_required"), Translator.translate("msg.text.please_log_in"))
             return
 
         token = session["access_token"]
@@ -898,13 +900,13 @@ class DashboardOverviewView(QWidget):
         al.setSpacing(12)
         h = QHBoxLayout()
         h.addWidget(StatusPulse(size=8, color="#8B5CF6"))
-        t = QLabel("AI Mentor Insights")
+        t = make_translatable(QLabel(), "ui.ai_mentor_insights")
         t.setStyleSheet("color: #0F172A; font-size: 15px; font-weight: 700;")
         h.addWidget(t)
         h.addStretch()
         al.addLayout(h)
         
-        msg = QLabel("Complete your academic roadmap and tasks to receive daily study tips and milestone recommendations here.")
+        msg = make_translatable(QLabel(), "ui.complete_your_academic")
         msg.setWordWrap(True)
         msg.setStyleSheet("color: #475569; font-size: 13px; line-height: 1.4;")
         al.addWidget(msg)
@@ -917,7 +919,7 @@ class DashboardOverviewView(QWidget):
         nl.setContentsMargins(0, 0, 0, 0)
         nl.setSpacing(16)
         
-        t2 = QLabel("Notifications")
+        t2 = make_translatable(QLabel(), "notif.tooltip")
         t2.setStyleSheet("color: #0F172A; font-size: 16px; font-weight: 800;")
         nl.addWidget(t2)
         
@@ -958,7 +960,7 @@ class DashboardOverviewView(QWidget):
         layout.addStretch()
         return panel
 
-class DashboardPage(QWidget):
+class DashboardPage(BaseTranslatableWidget):
     def __init__(self, parent=None, controller=None):
         super().__init__(parent)
         self.controller = controller
@@ -1004,7 +1006,7 @@ class DashboardPage(QWidget):
         layout.setSpacing(16)
         
         # Sidebar Toggle
-        self.btn_toggle = QPushButton("☰")
+        self.btn_toggle = make_translatable(QPushButton(), "nav.str")
         self.btn_toggle.setFixedSize(40, 40)
         self.btn_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_toggle.setStyleSheet("""
@@ -1033,7 +1035,7 @@ class DashboardPage(QWidget):
         layout.addWidget(self.btn_toggle)
 
         # Logo/Title
-        title_lbl = QLabel("Dashboard")
+        title_lbl = make_translatable(QLabel(), "ui.dashboard")
         title_lbl.setStyleSheet("font-size: 16px; font-weight: 800; color: #0F172A;")
         layout.addWidget(title_lbl)
         

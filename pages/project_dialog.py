@@ -1,3 +1,6 @@
+from core.translation.base_translatable_widget import make_translatable
+from core.translation.base_translatable_widget import BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
+from core.translation.translator import Translator
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
     QPushButton, QSpinBox, QTextEdit, QMessageBox, QScrollArea, QWidget, QCheckBox
@@ -6,7 +9,7 @@ from PyQt6.QtCore import Qt
 from database import portfolio_db
 from database import skill_tree_db
 
-class ProjectDialog(QDialog):
+class ProjectDialog(BaseTranslatableDialog):
     def __init__(self, project_data=None, parent=None):
         super().__init__(parent)
         self.project_data = project_data
@@ -15,7 +18,7 @@ class ProjectDialog(QDialog):
         if self.is_edit:
             self.setWindowTitle(f"Edit Project: {project_data.get('title')}")
         else:
-            self.setWindowTitle("Add New Project Portfolio")
+            self.setWindowTitle(Translator.translate("title.add_new_project"))
 
         self.resize(480, 680)
         self.setStyleSheet("""
@@ -86,23 +89,23 @@ class ProjectDialog(QDialog):
         self.layout.setContentsMargins(20, 20, 20, 20)
 
         # 1. Project Title
-        self.layout.addWidget(QLabel("Project Title:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.project_title"))
         self.title_input = QLineEdit()
-        self.title_input.setPlaceholderText("e.g. AI Interview Simulator")
+        self.title_input.setPlaceholderText(Translator.translate("placeholder.eg_ai_interview")); self.title_input.placeholder_translation_key = "placeholder.eg_ai_interview"
         if self.is_edit:
             self.title_input.setText(project_data.get("title", ""))
         self.layout.addWidget(self.title_input)
 
         # 2. Technologies
-        self.layout.addWidget(QLabel("Technologies Used (comma separated):"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.technologies_used_comma"))
         self.tech_input = QLineEdit()
-        self.tech_input.setPlaceholderText("e.g. Python, PyQt6, SQLite")
+        self.tech_input.setPlaceholderText(Translator.translate("placeholder.eg_python_pyqt6_1")); self.tech_input.placeholder_translation_key = "placeholder.eg_python_pyqt6_1"
         if self.is_edit:
             self.tech_input.setText(project_data.get("technologies", ""))
         self.layout.addWidget(self.tech_input)
 
         # 3. Short Description
-        self.layout.addWidget(QLabel("Project Description:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.project_description"))
         self.desc_input = QTextEdit()
         self.desc_input.setPlaceholderText("Describe your project's main functionality...")
         self.desc_input.setFixedHeight(70)
@@ -111,20 +114,20 @@ class ProjectDialog(QDialog):
         self.layout.addWidget(self.desc_input)
 
         # 4. GitHub / Demo Link
-        self.layout.addWidget(QLabel("GitHub or Demo URL:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.github_or_demo"))
         self.url_input = QLineEdit()
-        self.url_input.setPlaceholderText("e.g. https://github.com/username/project")
+        self.url_input.setPlaceholderText(Translator.translate("placeholder.eg_httpsgithubcomusernameproject")); self.url_input.placeholder_translation_key = "placeholder.eg_httpsgithubcomusernameproject"
         if self.is_edit:
             self.url_input.setText(project_data.get("github_url", ""))
         self.layout.addWidget(self.url_input)
 
         # 5. Milestones / Tasks Planner
-        self.layout.addWidget(QLabel("Project Milestones / Sub-Tasks:"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.project_milestones_subtasks"))
         
         task_add_lay = QHBoxLayout()
         self.task_name_input = QLineEdit()
-        self.task_name_input.setPlaceholderText("Enter milestone name (e.g. Design DB Schema)")
-        self.btn_add_task = QPushButton("+ Add Milestone")
+        self.task_name_input.setPlaceholderText(Translator.translate("placeholder.enter_milestone_name")); self.task_name_input.placeholder_translation_key = "placeholder.enter_milestone_name"
+        self.btn_add_task = make_translatable(QPushButton(), "dialog.add_milestone")
         self.btn_add_task.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_add_task.setStyleSheet("""
             QPushButton {
@@ -160,8 +163,8 @@ class ProjectDialog(QDialog):
 
         # 6. Completion Progress
         prog_header_lay = QHBoxLayout()
-        prog_header_lay.addWidget(QLabel("Completion Progress (0 - 100%):"))
-        self.progress_label_info = QLabel("Manual input")
+        prog_header_lay.addWidget(make_translatable(QLabel(), "dialog.completion_progress_0"))
+        self.progress_label_info = make_translatable(QLabel(), "dialog.manual_input")
         self.progress_label_info.setStyleSheet("color: #64748B; font-size: 11px;")
         prog_header_lay.addStretch()
         prog_header_lay.addWidget(self.progress_label_info)
@@ -183,7 +186,7 @@ class ProjectDialog(QDialog):
             self._refresh_tasks_list()
 
         # 7. Linked Skills (Checkbox List)
-        self.layout.addWidget(QLabel("Associate with Skills (from Tree):"))
+        self.layout.addWidget(make_translatable(QLabel(), "dialog.associate_with_skills"))
         
         skills_scroll = QScrollArea()
         skills_scroll.setFixedHeight(100)
@@ -230,7 +233,7 @@ class ProjectDialog(QDialog):
         self.btn_submit.setObjectName("btnPrimary")
         self.btn_submit.clicked.connect(self._submit)
         
-        self.btn_cancel = QPushButton("Cancel")
+        self.btn_cancel = make_translatable(QPushButton(), "button.cancel")
         self.btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_cancel.clicked.connect(self.reject)
         
@@ -244,7 +247,7 @@ class ProjectDialog(QDialog):
         if not name:
             return
         if any(t["task_name"].lower() == name.lower() for t in self.tasks):
-            QMessageBox.warning(self, "Duplicate Milestone", "A milestone task with this name already exists.")
+            QMessageBox.warning(self, Translator.translate("msg.title.duplicate_milestone"), Translator.translate("msg.text.a_milestone_task"))
             return
         self.tasks.append({"task_name": name, "completed": 0})
         self.task_name_input.clear()
@@ -311,17 +314,17 @@ class ProjectDialog(QDialog):
             completed = sum(1 for t in self.tasks if t["completed"])
             calc_val = int(completed / len(self.tasks) * 100) if self.tasks else 0
             self.progress_spin.setValue(calc_val)
-            self.progress_label_info.setText("Progress auto-calculated from milestones")
+            self.progress_label_info.setText(Translator.translate("ui.progress_autocalculated_from")); self.progress_label_info.translation_key = "ui.progress_autocalculated_from"
             self.progress_label_info.setStyleSheet("color: #10B981; font-size: 11px; font-weight: bold;")
         else:
             self.progress_spin.setEnabled(True)
-            self.progress_label_info.setText("Manual input (no milestones defined)")
+            self.progress_label_info.setText(Translator.translate("ui.manual_input_no")); self.progress_label_info.translation_key = "ui.manual_input_no"
             self.progress_label_info.setStyleSheet("color: #64748B; font-size: 11px; font-weight: normal;")
 
     def _submit(self):
         title = self.title_input.text().strip()
         if not title:
-            QMessageBox.warning(self, "Validation Error", "Project Title cannot be empty.")
+            QMessageBox.warning(self, Translator.translate("msg.title.validation_error"), Translator.translate("msg.text.project_title_cannot"))
             return
 
         technologies = self.tech_input.text().strip()
