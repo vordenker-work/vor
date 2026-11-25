@@ -634,6 +634,220 @@ class ClassBlock(QFrame):
     def _on_check_clicked(self):
         self.completed.emit(self.data, self.is_ai)
 
+class PomodoroTimerWidget(QFrame):
+    def __init__(self, parent_planner=None, parent=None):
+        super().__init__(parent)
+        self.parent_planner = parent_planner
+        self.setObjectName("PomodoroTimer")
+        
+        self.time_seconds = 25 * 60
+        self.is_running = False
+        self.mode = "study"
+        
+        self.setStyleSheet("""
+            #PomodoroTimer {
+                background-color: #FFF1F2;
+                border: 1px solid #FFE4E6;
+                border-radius: 14px;
+            }
+        """)
+        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
+        
+        # Header
+        hdr = QHBoxLayout()
+        self.icon_lbl = QLabel("🍅 Pomodoro")
+        self.icon_lbl.setStyleSheet("font-size: 13px; font-weight: 800; color: #E11D48; border: none; background: transparent;")
+        self.status_lbl = QLabel("HỌC")
+        self.status_lbl.setStyleSheet("font-size: 9px; font-weight: bold; color: white; background: #E11D48; border-radius: 4px; padding: 2px 6px; border: none;")
+        hdr.addWidget(self.icon_lbl)
+        hdr.addStretch()
+        hdr.addWidget(self.status_lbl)
+        layout.addLayout(hdr)
+        
+        # Timer Display
+        self.time_lbl = QLabel("25:00")
+        self.time_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.time_lbl.setStyleSheet("font-size: 32px; font-weight: 800; color: #E11D48; border: none; background: transparent; font-family: 'Segoe UI', Arial;")
+        layout.addWidget(self.time_lbl)
+        
+        # Task Selection Dropdown
+        self.task_cb = QComboBox()
+        self.task_cb.setFixedHeight(28)
+        self.task_cb.setStyleSheet("""
+            QComboBox {
+                background: white; border: 1px solid #FDA4AF; border-radius: 6px; padding: 2px 8px; font-size: 11px; color: #334155;
+            }
+        """)
+        layout.addWidget(self.task_cb)
+        
+        # Buttons layout
+        btn_lay = QHBoxLayout()
+        btn_lay.setSpacing(6)
+        
+        self.start_btn = QPushButton("▶ Bắt đầu")
+        self.start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.start_btn.setFixedHeight(28)
+        self.start_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #E11D48; color: white; border-radius: 6px; font-weight: bold; font-size: 11px; border: none;
+            }
+            QPushButton:hover { background-color: #BE123C; }
+        """)
+        self.start_btn.clicked.connect(self.toggle_timer)
+        btn_lay.addWidget(self.start_btn, 2)
+        
+        self.reset_btn = QPushButton("↺")
+        self.reset_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.reset_btn.setFixedSize(28, 28)
+        self.reset_btn.setStyleSheet("""
+            QPushButton {
+                background-color: white; color: #475569; border: 1px solid #FDA4AF; border-radius: 6px; font-weight: bold; font-size: 13px;
+            }
+            QPushButton:hover { background-color: #FFF1F2; }
+        """)
+        self.reset_btn.clicked.connect(self.reset_timer)
+        btn_lay.addWidget(self.reset_btn, 1)
+        
+        self.test_btn = QPushButton("🧪 1s")
+        self.test_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.test_btn.setFixedSize(36, 28)
+        self.test_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FFE4E6; color: #E11D48; border-radius: 6px; font-size: 9px; border: none;
+            }
+            QPushButton:hover { background-color: #FECDD3; }
+        """)
+        self.test_btn.clicked.connect(self.trigger_test_mode)
+        btn_lay.addWidget(self.test_btn, 1)
+        
+        layout.addLayout(btn_lay)
+        
+        # QTimer for countdown
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.tick)
+        
+        self.update_tasks()
+
+    def update_tasks(self):
+        self.task_cb.clear()
+        self.task_cb.addItem("Tập trung chung", "general")
+        if self.parent_planner:
+            manual_events, ai_events = self.parent_planner._get_student_data()
+            days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            today_wday = days_of_week[datetime.date.today().weekday()]
+            
+            seen_tasks = set()
+            for ev in manual_events:
+                if ev.get("day") == today_wday:
+                    title = ev.get("title", "").strip()
+                    if title and title not in seen_tasks:
+                        self.task_cb.addItem(title, title)
+                        seen_tasks.add(title)
+            for ev in ai_events:
+                if ev.get("day") == today_wday:
+                    title = ev.get("title", "").strip()
+                    if title and title not in seen_tasks:
+                        self.task_cb.addItem(title, title)
+                        seen_tasks.add(title)
+
+    def toggle_timer(self):
+        if self.is_running:
+            self.timer.stop()
+            self.start_btn.setText("▶ Bắt đầu")
+            self.is_running = False
+        else:
+            self.timer.start(1000)
+            self.start_btn.setText("⏸ Tạm dừng")
+            self.is_running = True
+
+    def reset_timer(self):
+        self.timer.stop()
+        self.is_running = False
+        self.start_btn.setText("▶ Bắt đầu")
+        if self.mode == "study":
+            self.time_seconds = 25 * 60
+        else:
+            self.time_seconds = 5 * 60
+        self.update_display()
+
+    def trigger_test_mode(self):
+        self.time_seconds = 3
+        self.update_display()
+
+    def tick(self):
+        if self.time_seconds > 0:
+            self.time_seconds -= 1
+            self.update_display()
+        else:
+            self.timer.stop()
+            self.is_running = False
+            self.start_btn.setText("▶ Bắt đầu")
+            self.handle_completion()
+
+    def update_display(self):
+        mins = self.time_seconds // 60
+        secs = self.time_seconds % 60
+        self.time_lbl.setText(f"{mins:02d}:{secs:02d}")
+
+    def handle_completion(self):
+        if self.mode == "study":
+            task_title = self.task_cb.currentText()
+            self.log_study_session(task_title, 25)
+            
+            QMessageBox.information(self, "Pomodoro Timer", f"Chúc mừng! Bạn đã hoàn thành phiên tập trung 25 phút cho: {task_title}.")
+            
+            self.mode = "break"
+            self.time_seconds = 5 * 60
+            self.status_lbl.setText("NGHỈ")
+            self.status_lbl.setStyleSheet("font-size: 9px; font-weight: bold; color: white; background: #059669; border-radius: 4px; padding: 2px 6px; border: none;")
+            self.icon_lbl.setStyleSheet("font-size: 13px; font-weight: 800; color: #059669; border: none; background: transparent;")
+            self.time_lbl.setStyleSheet("font-size: 32px; font-weight: 800; color: #059669; border: none; background: transparent; font-family: 'Segoe UI', Arial;")
+        else:
+            QMessageBox.information(self, "Pomodoro Timer", "Hết giờ nghỉ! Bắt đầu học tiếp thôi nào.")
+            
+            self.mode = "study"
+            self.time_seconds = 25 * 60
+            self.status_lbl.setText("HỌC")
+            self.status_lbl.setStyleSheet("font-size: 9px; font-weight: bold; color: white; background: #E11D48; border-radius: 4px; padding: 2px 6px; border: none;")
+            self.icon_lbl.setStyleSheet("font-size: 13px; font-weight: 800; color: #E11D48; border: none; background: transparent;")
+            self.time_lbl.setStyleSheet("font-size: 32px; font-weight: 800; color: #E11D48; border: none; background: transparent; font-family: 'Segoe UI', Arial;")
+            
+        self.update_display()
+        self.update_tasks()
+
+    def log_study_session(self, task_title, minutes):
+        student = crud.get_current_student()
+        if not student:
+            return
+            
+        context = student.get("context", {})
+        raw_input = context.get("raw_input", {})
+        if not isinstance(raw_input, dict):
+            raw_input = {}
+            
+        academic_context = raw_input.setdefault("academic_context", {})
+        study_sessions = academic_context.setdefault("study_sessions", [])
+        
+        study_sessions.append({
+            "task_title": task_title,
+            "date": datetime.date.today().isoformat(),
+            "minutes": minutes
+        })
+        
+        crud.save_student_context(
+            student_id=student["id"],
+            raw_input_dict=raw_input,
+            ai_plan_dict=context.get("ai_plan", {}),
+            ai_status=context.get("ai_status", "COMPLETED"),
+            ai_last_error=context.get("ai_last_error"),
+            is_dirty=1
+        )
+        
+        if self.parent_planner and hasattr(self.parent_planner, "refresh"):
+            self.parent_planner.refresh()
 
 class SmartTaskPlanner(BaseTranslatableWidget):
     def __init__(self, parent=None, controller=None):
@@ -728,6 +942,11 @@ class SmartTaskPlanner(BaseTranslatableWidget):
             self.filter_checkboxes[cat] = chk
 
         self.sidebar_layout.addWidget(self.filters_frame)
+        
+        # Pomodoro Timer
+        self.pomodoro_timer = PomodoroTimerWidget(parent_planner=self, parent=self)
+        self.sidebar_layout.addWidget(self.pomodoro_timer)
+        
         self.sidebar_layout.addStretch()
 
         self.splitter.addWidget(self.sidebar_widget)
@@ -1041,6 +1260,10 @@ class SmartTaskPlanner(BaseTranslatableWidget):
         self.refresh()
 
     def refresh(self):
+        # Update pomodoro tasks list
+        if hasattr(self, "pomodoro_timer"):
+            self.pomodoro_timer.update_tasks()
+
         # 1. Clear current grid layout
         while self.grid_layout.count():
             item = self.grid_layout.takeAt(0)
@@ -1107,15 +1330,20 @@ class SmartTaskPlanner(BaseTranslatableWidget):
                 filtered_ai.append(t)
                 
         # Dropdowns checks
-        f_idx = self.toolbar.filter_cb.currentIndex()
-        show_manual = f_idx in [0, 1]
-        show_ai = f_idx in [0, 2]
+        if hasattr(self, "toolbar") and self.toolbar is not None:
+            f_idx = self.toolbar.filter_cb.currentIndex()
+            show_manual = f_idx in [0, 1]
+            show_ai = f_idx in [0, 2]
+            sort_idx = self.toolbar.sort_cb.currentIndex()
+        else:
+            show_manual = True
+            show_ai = True
+            sort_idx = 0
         
         manual_to_show = filtered_manual if show_manual else []
         ai_to_show = filtered_ai if show_ai else []
         
         # Sort AI tasks if required
-        sort_idx = self.toolbar.sort_cb.currentIndex()
         if sort_idx == 1:
             ai_to_show.sort(key=lambda x: int(x.get("duration_min", 0)), reverse=True)
             

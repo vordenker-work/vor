@@ -1,6 +1,13 @@
+import sys
+import os
+
+# Add vor root to sys.path so core module can be imported when running directly
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+
 from core.translation.base_translatable_widget import make_translatable, BaseTranslatableWidget, BaseTranslatableFrame, BaseTranslatableDialog
 from core.translation.translator import Translator
-import sys
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QSpacerItem, QSizePolicy, QLineEdit,
                              QCheckBox, QFrame, QScrollArea)
@@ -548,6 +555,7 @@ class LoginPage(BaseTranslatableWidget):
 if __name__ == "__main__":
     from PyQt6.QtWidgets import QApplication
 
+    Translator.load_languages()
     app = QApplication(sys.argv)
     window = LoginPage()
     window.resize(1200, 800)

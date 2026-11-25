@@ -682,7 +682,7 @@ import './pages/profile.js';
 import './pages/auth.js';
 import './pages/chat.js';
 import './pages/applicants.js';
-import './pages/cvs.js';
+import './pages/cvs.js?v=3.0';
 
 // ==================== APP BOOTSTRAP ====================
 window.addEventListener('DOMContentLoaded', async () => {

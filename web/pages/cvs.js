@@ -414,6 +414,11 @@ export function renderCvs() {
   });
 
   renderCvsList(filtered, false);
+  
+  // Also update flashcard view if active
+  if (typeof currentCvViewMode !== 'undefined' && currentCvViewMode === 'flashcard') {
+    renderFlashcards();
+  }
 }
 
 function renderCvsList(cvs, isAiSorted) {
@@ -644,3 +649,375 @@ window.renderCvs = renderCvs;
 window.toggleCvSidebar = toggleCvSidebar;
 window.contactCandidate = contactCandidate;
 window.initCvsView = initCvsView;
+
+// ==========================================================================
+// FLASHCARD VIEW MODE
+// ==========================================================================
+
+let currentCvViewMode = 'grid'; // 'grid' | 'flashcard'
+let flashcardCurrentIndex = 0;
+let flashcardCvList = [];
+let flashcardSwipeStartX = 0;
+let flashcardSwipeCurrentX = 0;
+let flashcardIsSwiping = false;
+
+export function switchCvViewMode(mode) {
+  currentCvViewMode = mode;
+  const gridContainer = document.getElementById('cv-grid-container');
+  const flashcardContainer = document.getElementById('cv-flashcard-container');
+  const gridBtn = document.getElementById('cv-view-grid-btn');
+  const flashcardBtn = document.getElementById('cv-view-flashcard-btn');
+
+  if (!gridContainer || !flashcardContainer) return;
+
+  const activeClass = 'border border-cyan-500/20 bg-cyan-500/10 text-cyan-400 shadow-sm shadow-cyan-500/5';
+  const inactiveClass = 'border border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40';
+
+  if (mode === 'grid') {
+    gridContainer.classList.remove('hidden');
+    flashcardContainer.classList.add('hidden');
+    gridBtn.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${activeClass}`;
+    flashcardBtn.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${inactiveClass}`;
+  } else {
+    gridContainer.classList.add('hidden');
+    flashcardContainer.classList.remove('hidden');
+    flashcardBtn.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${activeClass}`;
+    gridBtn.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${inactiveClass}`;
+    renderFlashcards();
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+export function renderFlashcards() {
+  const source = candidatesList.length > 0 ? candidatesList : MOCK_CVS;
+  const filtered = source.filter(cv => {
+    if (cv.gpa < activeCvFilter.gpa) return false;
+    if (!activeCvFilter.majors.includes(cv.major)) return false;
+    if (activeCvFilter.skillQuery) {
+      const query = activeCvFilter.skillQuery;
+      const matchSkill = cv.skills.some(s => s.toLowerCase().includes(query));
+      const matchName = cv.name.toLowerCase().includes(query);
+      const matchUniv = cv.university.toLowerCase().includes(query);
+      if (!matchSkill && !matchName && !matchUniv) return false;
+    }
+    return true;
+  });
+
+  flashcardCvList = filtered;
+  flashcardCurrentIndex = 0;
+
+  const stack = document.getElementById('flashcard-stack');
+  const totalEl = document.getElementById('flashcard-total');
+  const currentEl = document.getElementById('flashcard-current-idx');
+  if (!stack) return;
+
+  if (totalEl) totalEl.innerText = filtered.length;
+  if (currentEl) currentEl.innerText = filtered.length > 0 ? '1' : '0';
+
+  if (filtered.length === 0) {
+    stack.innerHTML = `
+      <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-500">
+        <i data-lucide="inbox" class="w-10 h-10 text-slate-600 mb-2"></i>
+        <p class="text-sm font-semibold">${STATE.lang === 'vi' ? 'Không tìm thấy CV phù hợp.' : 'No matching CVs found.'}</p>
+      </div>
+    `;
+    if (window.lucide) window.lucide.createIcons();
+    return;
+  }
+
+  stack.innerHTML = filtered.map((cv, i) => {
+    const skillsHtml = cv.skills.map(s => `<span>${s}</span>`).join('');
+    const certsHtml = (cv.certificates && cv.certificates.length > 0)
+      ? cv.certificates.map(c => `<span>${c.name} (${c.year})</span>`).join('')
+      : `<span style="color:#64748b;font-style:italic;">Chưa có chứng chỉ</span>`;
+
+    const cardClass = i === 0 ? 'active' : (i === 1 ? 'next' : 'hidden-card');
+
+    return `
+      <div class="flashcard-item ${cardClass}" data-fc-index="${i}">
+        <div class="flashcard-inner">
+          <!-- FRONT: Ảnh cố định kích thước + bảng thông tin tóm tắt -->
+          <div class="flashcard-front">
+            <div class="flashcard-front-photo-wrapper">
+              <img src="${cv.avatar}" class="flashcard-front-photo" alt="${cv.name}" draggable="false" style="width: 136px !important; height: 136px !important; max-width: 136px !important; max-height: 136px !important; object-fit: cover !important; object-position: center 20% !important; border-radius: 24px !important; border: 2.5px solid rgba(34, 211, 238, 0.45) !important; box-shadow: 0 12px 28px rgba(0,0,0,0.55), 0 0 15px rgba(34, 211, 238, 0.2) !important;">
+            </div>
+            <div class="flashcard-front-body">
+              <div>
+                <div class="flashcard-front-row">
+                  <span class="fc-label">Họ Tên</span>
+                  <span class="fc-value">${cv.name}</span>
+                </div>
+                <div class="flashcard-front-row">
+                  <span class="fc-label">Trường</span>
+                  <span class="fc-value fc-accent">${cv.university}</span>
+                </div>
+                <div class="flashcard-front-row">
+                  <span class="fc-label">GPA</span>
+                  <span class="fc-value">${cv.gpa.toFixed(1)}</span>
+                </div>
+                <div class="flashcard-front-row">
+                  <span class="fc-label">Ngôn ngữ</span>
+                  <span class="fc-value">${cv.languages.split('(')[0].trim()}</span>
+                </div>
+                <div class="flashcard-front-row" style="align-items: flex-start;">
+                  <span class="fc-label">Kỹ năng</span>
+                  <div class="flashcard-front-skills">${skillsHtml}</div>
+                </div>
+              </div>
+              <div class="flashcard-front-actions">
+                <button class="flashcard-btn-heart" onclick="event.stopPropagation(); flashcardHeart(${cv.id})">
+                  <i data-lucide="heart" class="w-3.5 h-3.5"></i> Tim
+                </button>
+                <button class="flashcard-btn-save" onclick="event.stopPropagation(); flashcardSave(${cv.id})">
+                  <i data-lucide="bookmark" class="w-3.5 h-3.5"></i> Lưu trữ
+                </button>
+              </div>
+            </div>
+            <div class="flashcard-flip-hint">
+              <i data-lucide="rotate-3d" class="w-3 h-3"></i> Click để lật
+            </div>
+          </div>
+
+          <!-- BACK: Avatar nhỏ + sections chi tiết -->
+          <div class="flashcard-back">
+            <div class="flashcard-back-body">
+              <div class="flashcard-back-header">
+                <img src="${cv.avatar}" class="flashcard-back-avatar" alt="${cv.name}" draggable="false">
+                <div>
+                  <div class="flashcard-back-name">${cv.name}</div>
+                  <div class="flashcard-back-univ">${cv.university}</div>
+                </div>
+              </div>
+
+              <div class="flashcard-back-section">
+                <div class="flashcard-back-section-title">Ngoại ngữ:</div>
+                <span class="flashcard-back-lang-badge">${cv.languages}</span>
+              </div>
+
+              <div class="flashcard-back-section">
+                <div class="flashcard-back-section-title">Giới thiệu :</div>
+                <div class="flashcard-back-bio">${cv.bio || 'Chưa có giới thiệu.'}</div>
+              </div>
+
+              <div class="flashcard-back-section">
+                <div class="flashcard-back-section-title">Danh sách kỹ năng</div>
+                <div class="flashcard-back-skills-wrap">${skillsHtml}</div>
+              </div>
+
+              <div class="flashcard-back-section">
+                <div class="flashcard-back-section-title">Chứng chỉ & Giải Thưởng</div>
+                <div class="flashcard-back-certs-wrap">${certsHtml}</div>
+              </div>
+
+              <button class="flashcard-back-recruit-btn" onclick="event.stopPropagation(); contactCandidate('${cv.name}')">
+                Tuyển dụng
+              </button>
+            </div>
+            <div class="flashcard-flip-hint">
+              <i data-lucide="rotate-3d" class="w-3 h-3"></i> Click để lật lại
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) window.lucide.createIcons();
+  updateFlashcardNavButtons();
+  initFlashcardSwipe();
+}
+
+function updateFlashcardNavButtons() {
+  const prevBtn = document.getElementById('flashcard-prev-btn');
+  const nextBtn = document.getElementById('flashcard-next-btn');
+  if (prevBtn) prevBtn.disabled = flashcardCurrentIndex <= 0;
+  if (nextBtn) nextBtn.disabled = flashcardCurrentIndex >= flashcardCvList.length - 1;
+}
+
+function updateFlashcardCounter() {
+  const currentEl = document.getElementById('flashcard-current-idx');
+  if (currentEl) currentEl.innerText = flashcardCvList.length > 0 ? flashcardCurrentIndex + 1 : 0;
+}
+
+function setFlashcardPositions() {
+  const cards = document.querySelectorAll('.flashcard-item');
+  cards.forEach((card, i) => {
+    card.classList.remove('active', 'prev', 'next', 'hidden-card', 'swiping-left', 'swiping-right');
+    if (i === flashcardCurrentIndex) {
+      card.classList.add('active');
+    } else if (i === flashcardCurrentIndex - 1) {
+      card.classList.add('prev');
+    } else if (i === flashcardCurrentIndex + 1) {
+      card.classList.add('next');
+    } else {
+      card.classList.add('hidden-card');
+    }
+  });
+  updateFlashcardNavButtons();
+  updateFlashcardCounter();
+}
+
+export function flashcardNext() {
+  if (flashcardCurrentIndex >= flashcardCvList.length - 1) return;
+  
+  const currentCard = document.querySelector(`.flashcard-item[data-fc-index="${flashcardCurrentIndex}"]`);
+  if (currentCard) {
+    currentCard.classList.remove('active');
+    currentCard.classList.add('swiping-left');
+  }
+
+  setTimeout(() => {
+    flashcardCurrentIndex++;
+    setFlashcardPositions();
+  }, 350);
+}
+
+export function flashcardPrev() {
+  if (flashcardCurrentIndex <= 0) return;
+
+  const currentCard = document.querySelector(`.flashcard-item[data-fc-index="${flashcardCurrentIndex}"]`);
+  if (currentCard) {
+    currentCard.classList.remove('active');
+    currentCard.classList.add('swiping-right');
+  }
+
+  setTimeout(() => {
+    flashcardCurrentIndex--;
+    setFlashcardPositions();
+  }, 350);
+}
+
+export function toggleFlashcardFlip(index) {
+  if (index !== flashcardCurrentIndex) return;
+  const card = document.querySelector(`.flashcard-item[data-fc-index="${index}"]`);
+  if (!card) return;
+  card.classList.toggle('flipped');
+}
+
+function initFlashcardSwipe() {
+  const stack = document.getElementById('flashcard-stack');
+  if (!stack) return;
+
+  // Remove old listeners by replacing node
+  const newStack = stack.cloneNode(true);
+  stack.parentNode.replaceChild(newStack, stack);
+
+  let startX = 0;
+  let startY = 0;
+  let isDragging = false;
+  let hasMoved = false;
+  const SWIPE_THRESHOLD = 60;
+
+  const onStart = (e) => {
+    const touch = e.touches ? e.touches[0] : e;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    isDragging = true;
+    hasMoved = false;
+  };
+
+  const onMove = (e) => {
+    if (!isDragging) return;
+    const touch = e.touches ? e.touches[0] : e;
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+    if (Math.abs(dx) > 10) hasMoved = true;
+    
+    // Apply live transform on the active card for feedback
+    const activeCard = newStack.querySelector('.flashcard-item.active');
+    if (activeCard && Math.abs(dx) > 10) {
+      const rotation = dx * 0.05;
+      activeCard.style.transition = 'none';
+      activeCard.style.transform = `translateX(${dx * 0.5}px) scale(${1 - Math.abs(dx) * 0.0003}) rotateY(${rotation}deg)`;
+    }
+  };
+
+  const onEnd = (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+
+    const touch = e.changedTouches ? e.changedTouches[0] : e;
+    const dx = touch.clientX - startX;
+
+    const activeCard = newStack.querySelector('.flashcard-item.active');
+    if (activeCard) {
+      activeCard.style.transition = '';
+      activeCard.style.transform = '';
+    }
+
+    if (Math.abs(dx) > SWIPE_THRESHOLD && hasMoved) {
+      if (dx > 0) {
+        // Kéo phải → card tiếp theo (next)
+        flashcardNext();
+      } else {
+        // Kéo trái → card trước (prev)
+        flashcardPrev();
+      }
+    } else if (activeCard) {
+      // Snap back
+      activeCard.style.transform = 'translateX(0) scale(1)';
+    }
+  };
+
+  // Touch events
+  newStack.addEventListener('touchstart', onStart, { passive: true });
+  newStack.addEventListener('touchmove', onMove, { passive: true });
+  newStack.addEventListener('touchend', onEnd);
+
+  // Mouse events
+  newStack.addEventListener('mousedown', onStart);
+  newStack.addEventListener('mousemove', onMove);
+  newStack.addEventListener('mouseup', onEnd);
+  newStack.addEventListener('mouseleave', (e) => {
+    if (isDragging) onEnd(e);
+  });
+
+  // Attach click-to-flip on each card (only if not dragging)
+  newStack.querySelectorAll('.flashcard-item').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (hasMoved) return; // Don't flip if swiped
+      const idx = parseInt(card.getAttribute('data-fc-index'));
+      toggleFlashcardFlip(idx);
+    });
+    // Remove any stale inline onclick
+    card.removeAttribute('onclick');
+  });
+}
+
+// Keyboard navigation for flashcards
+document.addEventListener('keydown', (e) => {
+  if (currentCvViewMode !== 'flashcard') return;
+  if (e.key === 'ArrowLeft') {
+    flashcardPrev();
+  } else if (e.key === 'ArrowRight') {
+    flashcardNext();
+  } else if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    toggleFlashcardFlip(flashcardCurrentIndex);
+  }
+});
+
+export function flashcardHeart(cvId) {
+  showToast(STATE.lang === 'vi' ? 'Đã thêm vào danh sách yêu thích! ❤️' : 'Added to favorites! ❤️');
+}
+
+export function flashcardSave(cvId) {
+  showToast(STATE.lang === 'vi' ? 'Đã lưu trữ CV thành công! 📁' : 'CV saved successfully! 📁');
+}
+
+// Override renderCvs to also update flashcards if in flashcard mode
+const _originalRenderCvs = renderCvs;
+export function renderCvsWithFlashcard() {
+  _originalRenderCvs();
+  if (currentCvViewMode === 'flashcard') {
+    renderFlashcards();
+  }
+}
+
+window.switchCvViewMode = switchCvViewMode;
+window.flashcardNext = flashcardNext;
+window.flashcardPrev = flashcardPrev;
+window.toggleFlashcardFlip = toggleFlashcardFlip;
+window.flashcardHeart = flashcardHeart;
+window.flashcardSave = flashcardSave;

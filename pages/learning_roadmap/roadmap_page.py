@@ -134,6 +134,36 @@ class RoadmapCard(BaseTranslatableWidget):
         f.addWidget(vb, alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight); cl.addLayout(f); l.addWidget(self.card)
     def mousePressEvent(self, event): self.clicked.emit(self.data)
 
+def extract_skills_from_title(title):
+    title_lower = title.lower()
+    discovered = []
+    keywords = {
+        "python": "Python",
+        "javascript": "JavaScript",
+        "java": "Java",
+        "c++": "C++",
+        "c#": "C#",
+        "react": "React",
+        "html": "HTML/CSS",
+        "css": "HTML/CSS",
+        "machine learning": "Machine Learning",
+        "deep learning": "Deep Learning",
+        "data structure": "Data Structures & Algorithms",
+        "algorithm": "Data Structures & Algorithms",
+        "database": "Databases/SQL",
+        "sql": "Databases/SQL",
+        "robotics": "Robotics",
+        "object-oriented": "OOP",
+        "oop": "OOP",
+    }
+    for kw, skill in keywords.items():
+        if kw in title_lower:
+            discovered.append(skill)
+    if not discovered:
+        clean_title = title.replace("Complete ", "").replace("Master ", "").replace("Learn ", "").strip()
+        discovered.append(clean_title)
+    return discovered
+
 class LearningRoadmapPage(BaseTranslatableWidget):
     def __init__(self, parent=None, controller=None):
         super().__init__(parent); self.controller = controller; self.setObjectName("LearningRoadmapPage"); self.setStyleSheet("background-color: #F8FAFC;")
@@ -177,6 +207,37 @@ class LearningRoadmapPage(BaseTranslatableWidget):
         elif action == "edit":
             for m in rm:
                 if m.get("title") == old.get("title"): m.update(new); break
+                
+        # Sync to profile skills if completed
+        if action == "edit" and new and new.get("status") == "completed":
+            title = new.get("title", "")
+            skills_to_add = extract_skills_from_title(title)
+            
+            raw_input = ctx.get("raw_input", {})
+            student_info = raw_input.setdefault("student_info", {})
+            skills = student_info.setdefault("skills", [])
+            
+            updated_skills = False
+            for sk in skills_to_add:
+                if sk not in skills:
+                    skills.append(sk)
+                    updated_skills = True
+                    
+            if updated_skills:
+                crud.save_student_profile(
+                    student_id=s["id"],
+                    email=s["email"],
+                    username=s["username"],
+                    display_name=s.get("display_name", ""),
+                    major=s.get("major", ""),
+                    student_year=s.get("student_year", 1),
+                    university=s.get("university", ""),
+                    birth_year=s.get("birth_year"),
+                    age=s.get("age"),
+                    phone=s.get("phone"),
+                    is_dirty=1
+                )
+                
         p["academic_roadmap"] = rm; crud.save_student_context(student_id=s["id"], raw_input_dict=ctx.get("raw_input", {}), ai_plan_dict=p, ai_status=ctx.get("ai_status", "COMPLETED"), is_dirty=1); self.refresh()
     def refresh(self):
         for l in [self.cnl, self.kpl]:

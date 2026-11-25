@@ -3,7 +3,7 @@ import requests
 from core.config import SERVER_URL
 
 # Centralized configuration
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "http://127.0.0.1:8080"
 TIMEOUT = 10
 
 class WebClientError(Exception):

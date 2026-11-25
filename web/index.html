@@ -48,12 +48,12 @@
   </script>
 
   <!-- External Stylesheet for custom styling -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3.0">
 
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Application Core script -->
-  <script type="module" src="app.js" defer></script>
+  <script type="module" src="app.js?v=3.0" defer></script>
 </head>
 <body class="text-slate-100 antialiased selection:bg-cyan-500/30 selection:text-cyan-300">
 
@@ -344,15 +344,57 @@
               <span data-i18n="cv_list_title">Danh sách CV Sinh viên</span>
               <span id="cv-count-badge" class="rounded-full bg-slate-800/80 px-2 py-0.5 text-xs text-slate-400 font-medium">0 CVs</span>
             </h2>
-            <button id="cv-toggle-filter-btn" onclick="toggleCvSidebar()" class="flex items-center gap-1.5 rounded-xl border border-slate-800/80 bg-slate-900/30 hover:bg-cyan-500/5 hover:border-cyan-500/20 text-slate-300 hover:text-cyan-400 text-xs font-bold px-3.5 py-2 transition-all duration-200 shadow-sm">
-              <i data-lucide="sliders" class="w-3.5 h-3.5 text-cyan-400" id="cv-toggle-filter-icon"></i>
-              <span id="cv-toggle-filter-text" data-i18n="cv_hide_filters">Ẩn bộ lọc</span>
-            </button>
+            <div class="flex items-center gap-3">
+              <!-- View Mode Toggle -->
+              <div class="flex items-center gap-1 p-1 bg-slate-900/60 border border-slate-800/80 rounded-xl backdrop-blur-md">
+                <button id="cv-view-grid-btn" onclick="switchCvViewMode('grid')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 border border-cyan-500/20 bg-cyan-500/10 text-cyan-400 shadow-sm shadow-cyan-500/5" title="Hiển thị dạng lưới">
+                  <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Lưới</span>
+                </button>
+                <button id="cv-view-flashcard-btn" onclick="switchCvViewMode('flashcard')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 border border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40" title="Hiển thị dạng Flashcard">
+                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Flashcard</span>
+                </button>
+              </div>
+              <button id="cv-toggle-filter-btn" onclick="toggleCvSidebar()" class="flex items-center gap-1.5 rounded-xl border border-slate-800/80 bg-slate-900/30 hover:bg-cyan-500/5 hover:border-cyan-500/20 text-slate-300 hover:text-cyan-400 text-xs font-bold px-3.5 py-2 transition-all duration-200 shadow-sm">
+                <i data-lucide="sliders" class="w-3.5 h-3.5 text-cyan-400" id="cv-toggle-filter-icon"></i>
+                <span id="cv-toggle-filter-text" data-i18n="cv_hide_filters">Ẩn bộ lọc</span>
+              </button>
+            </div>
           </div>
           
-          <!-- CV List Container -->
+          <!-- CV List Container (Grid View) -->
           <div id="cv-grid-container" class="grid grid-cols-1 md:grid-cols-2 gap-5 animate-fade-in">
             <!-- Rendered Dynamically -->
+          </div>
+
+          <!-- CV Flashcard Container (Flashcard View) -->
+          <div id="cv-flashcard-container" class="hidden">
+            <div class="flashcard-viewport">
+              <!-- Card counter -->
+              <div class="flashcard-counter" id="flashcard-counter">
+                <span id="flashcard-current-idx">1</span> / <span id="flashcard-total">0</span>
+              </div>
+              
+              <!-- Swipe hint -->
+              <div class="flashcard-hint" id="flashcard-hint">
+                <i data-lucide="move-horizontal" class="w-4 h-4"></i>
+                <span>Kéo sang trái/phải để chuyển CV</span>
+              </div>
+
+              <!-- Flashcard stack wrapper -->
+              <div class="flashcard-stack" id="flashcard-stack">
+                <!-- Rendered Dynamically -->
+              </div>
+
+              <!-- Navigation arrows -->
+              <button class="flashcard-nav flashcard-nav-prev" id="flashcard-prev-btn" onclick="flashcardPrev()" title="CV trước">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+              </button>
+              <button class="flashcard-nav flashcard-nav-next" id="flashcard-next-btn" onclick="flashcardNext()" title="CV tiếp theo">
+                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+              </button>
+            </div>
           </div>
         </div>
 
