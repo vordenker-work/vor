@@ -5,8 +5,6 @@ tkinter_backup
 database/client_store.db
 phase4_deploy/
 phase5_deploy/
-news_bridge/data.db
 *.log
 .app_data.json
-# Added by code-review-graph
-.code-review-graph/
+.DS_Store

@@ -10,8 +10,10 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QByteArray, QCoreApplication
 from PyQt6.QtGui import QColor, QFont, QLinearGradient, QPalette, QPixmap, QPainter, QPageSize
+from PyQt6.QtPrintSupport import QPrinter
 from modules.local_storage import local_data
-from core.config import SERVER_URL
+from database import crud
+from weblink import web_client
 
 class CVBuilderPage(BaseTranslatableWidget):
     def __init__(self, controller=None):
@@ -613,12 +615,25 @@ class CVBuilderPage(BaseTranslatableWidget):
                 "image_base64": c.get("image_base64", "")
             })
             
+        gpa_val = 0.0
+        student = crud.get_current_student()
+        if student:
+            calc_gpa, _ = crud.calculate_gpa(student["id"])
+            if calc_gpa > 0:
+                gpa_val = calc_gpa
+            else:
+                ctx_gpa = student.get("context", {}).get("raw_input", {}).get("student_info", {}).get("gpa", 0.0)
+                try:
+                    gpa_val = float(ctx_gpa or 0.0)
+                except (TypeError, ValueError):
+                    gpa_val = 0.0
+
         payload = {
             "name": name,
-            "email": email,
+            "email": email or (student.get("email") if student else None),
             "major": major,
             "university": uni,
-            "gpa": 3.8,
+            "gpa": round(max(0.0, min(4.0, gpa_val)), 2),
             "skills": skills,
             "languages": "English, Vietnamese",
             "bio": bio,
@@ -631,15 +646,13 @@ class CVBuilderPage(BaseTranslatableWidget):
         QCoreApplication.processEvents()
         
         try:
-            r = requests.post("http://127.0.0.1:8000/cvs", json=payload, timeout=5)
-            r.raise_for_status()
-            res = r.json()
+            res = web_client.sync_cv(payload)
             if res.get("success"):
                 QMessageBox.information(self, Translator.translate("msg.title.dong_bo_thanh"), Translator.translate("msg.text.cv_cua_ban"))
             else:
                 QMessageBox.warning(self, "Thất bại", f"Đồng bộ không thành công: {res.get('message')}")
         except Exception as e:
-            QMessageBox.critical(self, "Lỗi kết nối", f"Không thể kết nối đến Web Recruiter Portal:\n{str(e)}\n\nVui lòng kiểm tra xem server web portal (port 8000) đã khởi động chưa.")
+            QMessageBox.critical(self, "Lỗi kết nối", f"Không thể kết nối đến Vor Backend:\n{str(e)}")
         finally:
             self.btn_sync.setText(Translator.translate("ui.sync_to_web")); self.btn_sync.translation_key = "ui.sync_to_web"
             self.btn_sync.setEnabled(True)

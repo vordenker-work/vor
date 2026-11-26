@@ -1,3 +1,4 @@
+import os
 import sys
 from PyQt6.QtWidgets import QApplication
 
@@ -119,8 +120,9 @@ def get_global_stylesheet():
     QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: transparent; }}
     """
 
-# --- BACKEND SERVER URL ---
-SERVER_URL = "http://100.80.253.23:8000"
+# --- APP VERSION & BACKEND SERVER URL ---
+APP_VERSION = "1.1.0"
+SERVER_URL = os.getenv("VOR_SERVER_URL", "http://100.68.27.101:8000").rstrip("/")
 
 
 def apply_theme(widget):
